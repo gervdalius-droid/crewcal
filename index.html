@@ -3978,7 +3978,7 @@ function mkModal(){
 function render(){
   try{
   var app=document.getElementById('app');app.innerHTML='';app.className='shell';
-  if(S.screen==='loading'){var ls=el('div','authscreen');var lc=el('div','authcard',{textAlign:'center'});lc.innerHTML='<div style="width:62px;height:62px;margin:0 auto 14px"><sif(S.screen==='loading'){var ls=el('div','authscreen',{background:'#000'});var lc=el('div','authcard',{textAlign:'center',background:'transparent',border:'none',boxShadow:'none'});lc.innerHTML='<img src="icon-512.png" alt="CrewCal" style="width:200px;height:200px;display:block;margin:0 auto 14px"/><div style="font-size:13px;color:#9b96a8;letter-spacing:.4px">Loading…</div>';ls.appendChild(lc);app.appendChild(ls);return;}(mkWaitingScreen());return;}
+  if(S.screen==='loading'){var ls=el('div','authscreen',{background:'#000'});var lc=el('div','authcard',{textAlign:'center',background:'transparent',border:'none',boxShadow:'none'});lc.innerHTML='<img src="icon-512.png" alt="CrewCal" style="width:200px;height:200px;display:block;margin:0 auto 14px"/><div style="font-size:13px;color:#9b96a8;letter-spacing:.4px">Loading…</div>';ls.appendChild(lc);app.appendChild(ls);return;}if(S.screen==='auth'){app.appendChild(mkAuthScreen());return;}if(S.screen==='setup'){app.appendChild(mkSetupScreen());return;}if(S.screen==='waiting'){app.appendChild(mkWaitingScreen());return;}
 
   var modal=mkModal();if(modal)app.appendChild(modal);
   var tm=mkTripModal();if(tm)app.appendChild(tm);
