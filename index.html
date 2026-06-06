@@ -1039,6 +1039,13 @@ input,textarea,[contenteditable]{ -webkit-user-select:text; user-select:text; -w
 .fi{ border-radius:12px; }
 .fi.on{ background:linear-gradient(135deg,#6d5cff,#ec4899); color:#fff; border-color:transparent; }
 .fi.on .fick{ color:#fff; }
+
+/* ── 24. Unify primary action + mode toggle to brand gradient ── */
+.search-btn{ background:linear-gradient(135deg,#6d5cff,#ec4899); border-radius:13px; box-shadow:0 6px 18px rgba(124,76,245,.3); }
+.search-btn:hover{ background:linear-gradient(135deg,#5b4cf5,#db2777); }
+.modetab{ display:inline-flex; align-items:center; border:1.5px solid var(--bd2); border-radius:999px; padding:7px 15px; font-size:12px; font-weight:600; color:var(--mt); background:var(--s); cursor:pointer; font-family:inherit; transition:all .15s; }
+.modetab:hover{ border-color:var(--a); color:var(--at); }
+.modetab.on{ border-color:transparent; background:linear-gradient(135deg,#6d5cff,#ec4899); color:#fff; box-shadow:0 3px 10px rgba(124,76,245,.3); }
 </style>
 </head>
 <body>
@@ -3566,8 +3573,8 @@ var ownerDot=el('div','');ownerDot.style.cssText='width:16px;height:16px;border-
   // Mode toggle: Events ↔ Places
   var modeRow=el('div','',{display:'flex',gap:'6px',marginBottom:'10px'});
   [{id:'events',icon:'calendar',lbl:'Events'},{id:'places',icon:'pin',lbl:'Places'}].forEach(function(mode){
-    var btn=mk('button','',null,{border:'1.5px solid '+(S.searchMode===mode.id?'var(--a)':'var(--bd)'),borderRadius:'20px',padding:'5px 14px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:S.searchMode===mode.id?'var(--abg)':'var(--s)',color:S.searchMode===mode.id?'var(--at)':'var(--mt)',fontFamily:'inherit',transition:'all .15s'});
-    btn.innerHTML=ICN(mode.icon,{size:14,color:(S.searchMode===mode.id?'var(--at)':'var(--mt)'),style:'margin-right:6px'})+mode.lbl;
+    var _act=S.searchMode===mode.id;var btn=el('button','modetab'+(_act?' on':''));
+    btn.innerHTML=ICN(mode.icon,{size:14,color:(_act?'#fff':'var(--mt)'),style:'margin-right:6px;vertical-align:-2px'})+mode.lbl;
     on(btn,'click',function(){S.searchMode=mode.id;render();});
     modeRow.appendChild(btn);
   });
