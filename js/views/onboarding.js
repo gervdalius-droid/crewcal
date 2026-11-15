@@ -5,6 +5,14 @@ import { segmented } from '../ui.js';
 
 const auth = { mode: 'signin', email: '', password: '', busy: false, sent: '', err: '' };
 
+// Onboarding screens share the welcome page's look: glow background + logo above the card.
+function onbShell(card) {
+  return h('div.onb.onb-branded', h('div.onb-glow'),
+    h('div.onb-wrap',
+      h('a.onb-brand', { href: './', 'aria-label': 'Whossup' }, h('img', { src: 'img/mark.png', alt: '', width: 44, height: 44 }), h('span.brand-name', 'whos', h('span.wm-sup', 'sup'))),
+      card));
+}
+
 export function welcomeScreen() {
   // The same availability grid as the share image: gradient days = everyone's free.
   const grid = h('div.hero-grid', { 'aria-hidden': 'true' });
@@ -51,11 +59,8 @@ export function authScreen() {
       a.mode === 'signin' ? h('button.linkish.center.mt', { type: 'button', onclick: forgot }, 'Forgot password?') : null,
       a.mode === 'signup' ? h('p.tiny.muted.center.mt', 'By continuing you agree to the ', h('a', { href: 'legal.html#terms', target: '_blank' }, 'Terms'), ' and ', h('a', { href: 'legal.html#privacy', target: '_blank' }, 'Privacy Policy'), '.') : null);
   }
-  return h('div.onb',
-    h('div.onb-glow'),
-    h('div.onb-card',
+  return onbShell(h('div.onb-card',
       h('button.iconbtn.ghost.back', { 'aria-label': 'Back', onclick: () => { S.screen = 'welcome'; render(); } }, icon('chevL')),
-      h('img.onb-mark', { src: 'img/mark.png', alt: '', width: 56, height: 56 }),
       h('h1.onb-h', a.mode === 'signup' ? 'Create your account' : 'Welcome back'),
       form));
 
@@ -90,7 +95,7 @@ export function profileScreen() {
   const upd = () => preview.replaceChildren(avatar({ name: prof.name || '?', color: prof.color }, 72));
   upd();
   const name = h('input', { placeholder: 'e.g. Alex', maxlength: 40, value: prof.name, autofocus: true, autocomplete: 'given-name', oninput: e => { prof.name = e.target.value; upd(); }, onkeydown: e => e.key === 'Enter' && save() });
-  return h('div.onb', h('div.onb-glow'), h('div.onb-card',
+  return onbShell(h('div.onb-card',
     h('div.steps', h('i.on'), h('i'), h('i')),
     preview,
     h('h1.onb-h', 'What should your crew call you?'),
@@ -117,13 +122,13 @@ export function crewScreen() {
   if (cf.tab === 'create') card.append(crewCreateForm(cf, null, async () => { const g = await attempt(() => createCrew(cf.name.trim(), cf.emoji)); if (g) { S.tab = 'crew'; render(); toast('Crew created — now invite your friends 🎉', 'ok'); } }));
   else card.append(joinForm(cf, async () => { const r = await attempt(() => joinCrew(cf.code)); if (r && r.status === 'active') toast('Welcome to ' + r.name + ' 🎉', 'ok'); }));
   card.append(h('button.linkish.center.mt', { onclick: () => S.api.signOut() }, 'Sign out'));
-  return h('div.onb', h('div.onb-glow'), card);
+  return onbShell(card);
 }
 
 export function pendingScreen() {
   const g = group();
   const others = S.groups.filter(x => x.status === 'active');
-  return h('div.onb', h('div.onb-glow'), h('div.onb-card.center',
+  return onbShell(h('div.onb-card.center',
     h('div.steps', h('i.done'), h('i.done'), h('i.on')),
     h('div.crew-emoji.xl.pulse', g?.emoji || '🪩'),
     h('h1.onb-h', 'Waiting to join ' + (g?.name || 'the crew')),

@@ -706,3 +706,24 @@ details.past .stack { opacity: .7; margin-top: 8px; }
   .wstep-ic { display: none; }
   .welcome-steps::before { left: 20px; }
 }
+
+/* ── Onboarding screens: same brand look as the welcome page ── */
+.onb-branded .onb-glow { background:
+  radial-gradient(45% 45% at 10% 10%, rgba(124,92,255,.30), transparent 70%),
+  radial-gradient(45% 50% at 90% 95%, rgba(236,72,153,.22), transparent 70%); }
+.onb-wrap { position: relative; width: 100%; max-width: 440px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.onb-wrap .onb-card { max-width: none; }
+.onb-brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+.onb-brand img { width: 44px; height: 44px; border-radius: 13px; box-shadow: 0 6px 22px rgba(236,72,153,.28); }
+.onb-brand .brand-name { font-size: 28px; }
+.onb-branded .onb-card { border-radius: 26px; padding-top: 30px; }
+.onb-branded .onb-h { font-weight: 700; letter-spacing: -.02em; }
+.onb-branded .steps i.on { background: var(--disco); }
+.onb-branded .steps i.done { background: #a78bfa; opacity: 1; }
+.onb-branded .btn.primary, .onb-branded .btn.iris { background: var(--disco); color: #fff; border: 0; box-shadow: 0 8px 26px rgba(236,72,153,.3); }
+.onb-branded .seg > button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 0 0 1.5px rgba(167,139,250,.55); }
+.onb-branded .emoji-pick button.on { border-color: #ec4899; background: rgba(236,72,153,.1); }
+.onb-branded input:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(167,139,250,.22); }
+.onb-branded .linkish { color: #ec4899; }
+.onb-branded .back { top: 18px; }
+@media (max-width: 759px) { .onb-wrap { gap: 16px; } .onb-brand .brand-name { font-size: 24px; } .onb-brand img { width: 38px; height: 38px; } }

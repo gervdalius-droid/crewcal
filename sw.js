@@ -1,5 +1,5 @@
 // Offline shell: cache-first for app files, network-only for the API.
-const VERSION = 'whossup-v2.5.1';
+const VERSION = 'whossup-v2.6.0';
 const SHELL = ['./', 'index.html', 'css/app.css', 'lib/supabase.js', 'manifest.json',
   'js/app.js', 'js/store.js', 'js/api.js', 'js/demo.js', 'js/config.js', 'js/util.js', 'js/logic.js', 'js/ui.js',
   'js/views/calendar.js', 'js/views/plans.js', 'js/views/chat.js', 'js/views/money.js', 'js/views/crew.js', 'js/views/onboarding.js',
