@@ -7,7 +7,7 @@ v2 replaces it with proper tables under row-level security. Same Supabase projec
 
 ## 1. Database (5 min)
 1. Supabase dashboard → SQL editor → paste `supabase/migrations/001_crewcal_v2.sql` → Run.
-2. Paste `supabase/verify.sql` → Run. Expect **"CrewCal RLS: all checks passed"**. Anything starting
+2. Paste `supabase/verify.sql` → Run. Expect **"Whossup RLS: all checks passed"**. Anything starting
    with `FAIL:` means stop and investigate.
 3. Advisors → Security: should show no "RLS disabled" errors for the new tables.
 
@@ -21,7 +21,7 @@ Optional: `AI_FREE_MONTHLY` (default 25; keep in sync with `js/config.js`), `GEM
 
 ## 3. Auth settings (Authentication → URL configuration)
 - Site URL = your app URL; add the same URL to Redirect URLs (magic links, confirmations, password reset).
-- Email templates: put the CrewCal name in the subject lines.
+- Email templates: put the Whossup name in the subject lines.
 - Turn on "Confirm email" and leaked-password protection. Set a custom SMTP sender before real users
   arrive: Supabase's built-in mailer is rate-limited to a few emails per hour.
 
@@ -32,7 +32,7 @@ Any static host works (no build). Cheapest options:
 Use HTTPS (the service worker only registers on https).
 
 ## 5. Before inviting people
-- Replace `hello@crewcal.app` (`js/config.js`, `legal.html`) with an inbox you own.
+- Replace `hello@whossup.app` (`js/config.js`, `legal.html`) with an inbox you own.
 - Read `legal.html`. It's a plain-language draft; have it checked before charging money.
 - Affiliate IDs: booking links currently carry none. Sign up for Booking.com / Skyscanner /
   GetYourGuide partner programmes and add your IDs in `bookingLinks()` (`js/logic.js`).

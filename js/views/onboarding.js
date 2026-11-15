@@ -13,7 +13,7 @@ export function welcomeScreen() {
   return h('div.onb.welcome',
     h('div.onb-glow'),
     h('div.welcome-in',
-      h('img.welcome-logo', { src: 'img/logo.png', alt: 'crewcal', width: 320, height: 320 }),
+      h('img.welcome-logo', { src: 'img/logo.png', alt: 'whossup', width: 320, height: 320 }),
       h('h1.welcome-h', 'Find the day ', h('span.iris-text', 'everyone’s free'), '.'),
       h('ol.welcome-steps',
         [['calendar', 'Mark your busy days', 'One tap per day — or import your calendar'],

@@ -48,7 +48,7 @@ setRender(render);
 
 function screen() {
   switch (S.screen) {
-    case 'boot': return h('div.boot', h('img.boot-logo', { src: 'img/mark.png', alt: 'CrewCal', width: 88, height: 88 }));
+    case 'boot': return h('div.boot', h('img.boot-logo', { src: 'img/mark.png', alt: 'Whossup', width: 88, height: 88 }));
     case 'welcome': return welcomeScreen();
     case 'auth': return authScreen();
     case 'profile': return profileScreen();
@@ -69,7 +69,7 @@ function shell() {
   const meBtn = h('button.me-btn', { onclick: openProfile, 'aria-label': 'Your profile' }, avatar({ name: S.profile?.name, color: S.profile?.color }, 34));
 
   const top = h('header.topbar',
-    h('img.top-mark', { src: 'img/mark.png', alt: 'CrewCal', width: 32, height: 32 }),
+    h('img.top-mark', { src: 'img/mark.png', alt: 'Whossup', width: 32, height: 32 }),
     crewBtn,
     h('div.top-r',
       S.syncing ? h('span.sync', { title: 'Syncing' }, h('span.spin.sm')) : null,
@@ -78,7 +78,7 @@ function shell() {
       meBtn));
 
   const side = h('aside.rail',
-    h('div.rail-logo', h('img', { src: 'img/mark.png', alt: '', width: 36, height: 36 }), h('span.wordmark', 'crewcal')),
+    h('div.rail-logo', h('img', { src: 'img/mark.png', alt: '', width: 36, height: 36 }), h('span.wordmark', 'whossup')),
     h('button.crew-switch.rail-crew', { onclick: openCrewSwitcher }, h('span.crew-e', g?.emoji || '🪩'), h('span.crew-n', g?.name || 'Crew'), icon('chevD', 16)),
     nav('rail-nav'),
     h('div.rail-foot', !S.online ? h('div.offline.mb-s', 'Offline — changes will fail') : null, h('button.rail-me', { onclick: openProfile }, avatar({ name: S.profile?.name, color: S.profile?.color }, 32), h('span', S.profile?.name || ''), S.api.demo ? h('span.demo-tag', 'Demo') : null)));
@@ -132,4 +132,4 @@ if (!isDemo && !window.supabase) toast('Could not reach the server — showing t
 boot(api).catch(e => { console.error(e); S.screen = 'welcome'; render(); toast('Could not connect — check your internet', 'err'); });
 
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
-window.__crewcal = { S, loadCrew, go, render };
+window.__whossup = { S, loadCrew, go, render };

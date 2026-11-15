@@ -48,7 +48,7 @@ export function moneyView() {
 
   const feed = [...expenses.map(e => ({ t: e.created_at, e })), ...settlements.map(s => ({ t: s.created_at, s }))].sort((a, b) => a.t < b.t ? 1 : -1);
   wrap.append(h('h3.list-title', 'Activity'));
-  if (!feed.length) wrap.append(empty('wallet', 'No expenses yet', 'Paid for the cabin, the tickets or the taxi? Add it here and CrewCal works out who owes whom.', h('button.btn.primary', { onclick: () => openExpenseForm({}) }, 'Add the first expense')));
+  if (!feed.length) wrap.append(empty('wallet', 'No expenses yet', 'Paid for the cabin, the tickets or the taxi? Add it here and Whossup works out who owes whom.', h('button.btn.primary', { onclick: () => openExpenseForm({}) }, 'Add the first expense')));
   else wrap.append(h('div.card.flush', feed.map(({ e, s }) => e ? expenseRow(e) : settleRow(s))));
   return wrap;
 }
@@ -76,7 +76,7 @@ function settleRow(s) {
 
 export function openExpenseForm(pre) {
   const people = active();
-  let lastCur; try { lastCur = localStorage.getItem('crewcal-cur'); } catch {}
+  let lastCur; try { lastCur = localStorage.getItem('whossup-cur'); } catch {}
   const f = { title: '', amount: '', currency: lastCur || 'EUR', paid_by: me(), event_id: '', ...pre };
   const ev = f.event_id && S.crew.events.find(e => e.id === f.event_id);
   const going = ev ? S.crew.rsvps.filter(r => r.event_id === ev.id && r.status === 'going').map(r => r.user_id) : [];
@@ -100,7 +100,7 @@ export function openExpenseForm(pre) {
         if (!(amount > 0)) return toast('Enter an amount', 'err');
         if (!split.size) return toast('Pick who shares it', 'err');
         btn.disabled = true;
-        try { localStorage.setItem('crewcal-cur', f.currency); } catch {}
+        try { localStorage.setItem('whossup-cur', f.currency); } catch {}
         const ok = await attempt(() => addExpense({ title: f.title.trim(), amount, currency: f.currency, paid_by: f.paid_by, split_with: [...split], event_id: f.event_id || null }).then(() => true), 'Expense added');
         if (ok) { s.close(); if (S.tab !== 'money') toast('Added — see it in Money', 'ok'); } else btn.disabled = false;
       } }, 'Add expense'));

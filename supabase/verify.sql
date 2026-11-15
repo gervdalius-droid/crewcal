@@ -1,6 +1,6 @@
--- CrewCal security self-test. Paste into the SQL editor AFTER 001_crewcal_v2.sql.
+-- Whossup security self-test. Paste into the SQL editor AFTER 001_crewcal_v2.sql.
 -- Creates three throwaway users inside a transaction, tries every attack as them,
--- and ROLLS BACK — nothing is left behind. Success = "CrewCal RLS: all checks passed".
+-- and ROLLS BACK — nothing is left behind. Success = "Whossup RLS: all checks passed".
 begin;
 
 insert into auth.users (id, email, aud, role) values
@@ -98,6 +98,6 @@ do $$ begin
 exception when insufficient_privilege then null; end $$;
 
 reset role;
-do $$ begin raise notice 'CrewCal RLS: all checks passed'; end $$;
-select 'CrewCal RLS: all checks passed' as result;
+do $$ begin raise notice 'Whossup RLS: all checks passed'; end $$;
+select 'Whossup RLS: all checks passed' as result;
 rollback;

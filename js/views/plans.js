@@ -188,7 +188,7 @@ export function openEventForm(pre) {
 let briefText = { gid: null, text: '' };
 function briefCard(planned, ideas) {
   const people = active();
-  if (people.length < 2) return h('div.card.brief', h('div.brief-t', 'Your crew is just you so far'), h('p.muted', 'Invite friends from the Crew tab — CrewCal gets useful once everyone shares their busy days.'));
+  if (people.length < 2) return h('div.card.brief', h('div.brief-t', 'Your crew is just you so far'), h('p.muted', 'Invite friends from the Crew tab — Whossup gets useful once everyone shares their busy days.'));
   const bm = bmap();
   const wins = freeWindows(people, bm, { horizon: 60, minLen: 1, limit: 3 });
   const next = planned[0];
@@ -330,12 +330,12 @@ function placeCard(p) {
 // ── Trip planner ─────────────────────────────────────────────
 export function openTripSheet(ev) {
   const going = ev.id ? rsvpsFor(ev.id).filter(r => r.status === 'going').length : 0;
-  const t = { origin: localStorage.getItem('crewcal-origin') || '', guests: Math.max(2, going || active().length || 2), summary: null, loading: false, error: '' };
+  const t = { origin: localStorage.getItem('whossup-origin') || '', guests: Math.max(2, going || active().length || 2), summary: null, loading: false, error: '' };
   const nights = Math.max(1, daysBetween(ev.starts_on, ev.ends_on) || 1);
   openSheet({ title: 'Plan the trip', wide: true }, (body, sheet) => {
     const b = tripBudget(ev.location, nights, t.guests, ev.price_min ? +ev.price_min : 0);
     body.append(h('div.trip-head', h('div.ev-cat', catEmoji(ev.category), ' ', ev.title), h('div.trip-where', icon('pin', 16), ev.location || 'Somewhere great', ' · ', fmtRange(ev.starts_on, ev.ends_on), ' · ', nights + ' night' + (nights > 1 ? 's' : ''))));
-    const originIn = h('input', { placeholder: 'e.g. Vilnius', value: t.origin, oninput: e => { t.origin = e.target.value; try { localStorage.setItem('crewcal-origin', t.origin); } catch {} }, onchange: () => sheet.redraw() });
+    const originIn = h('input', { placeholder: 'e.g. Vilnius', value: t.origin, oninput: e => { t.origin = e.target.value; try { localStorage.setItem('whossup-origin', t.origin); } catch {} }, onchange: () => sheet.redraw() });
     body.append(h('div.two', field('Flying from', originIn), field('People', h('div.stepper', h('button', { 'aria-label': 'Fewer', onclick: () => { t.guests = Math.max(1, t.guests - 1); sheet.redraw(); } }, '−'), h('span', t.guests), h('button', { 'aria-label': 'More', onclick: () => { t.guests = Math.min(30, t.guests + 1); sheet.redraw(); } }, '+')))));
 
     body.append(h('div.budget',

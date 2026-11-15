@@ -1,5 +1,5 @@
 // Supabase Edge Function: "ai"
-// All CrewCal AI features go through here. Prompts are built server-side from a
+// All Whossup AI features go through here. Prompts are built server-side from a
 // few typed parameters, so this is not a general-purpose Gemini proxy.
 //
 // Checks, in order: signed-in user → active member of the crew → monthly quota.
@@ -7,7 +7,7 @@
 // Deploy:
 //   supabase secrets set GEMINI_API_KEY=...            (required)
 //   supabase secrets set AI_FREE_MONTHLY=25            (optional, default 25)
-//   supabase secrets set ALLOW_ORIGIN=https://crewcal.app   (optional, default *)
+//   supabase secrets set ALLOW_ORIGIN=https://whossup.app   (optional, default *)
 //   supabase functions deploy ai
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 

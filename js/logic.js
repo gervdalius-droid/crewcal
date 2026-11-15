@@ -161,13 +161,13 @@ function expandRRule(start, rule, limit) {
   return out;
 }
 
-export function eventsToIcs(events, crewName = 'CrewCal') {
+export function eventsToIcs(events, crewName = 'Whossup') {
   const esc = s => String(s || '').replace(/\\/g, '\\\\').replace(/[,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
   const stamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
-  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//CrewCal//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:' + esc(crewName)];
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Whossup//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:' + esc(crewName)];
   for (const e of events) {
     const ds = e.starts_on.replace(/-/g, '');
-    L.push('BEGIN:VEVENT', 'UID:' + e.id + '@crewcal', 'DTSTAMP:' + stamp);
+    L.push('BEGIN:VEVENT', 'UID:' + e.id + '@whossup', 'DTSTAMP:' + stamp);
     if (e.start_time && e.starts_on === e.ends_on) {
       const t = e.start_time.slice(0, 5).replace(':', '') + '00';
       const t2 = (e.end_time || e.start_time).slice(0, 5).replace(':', '') + '00';

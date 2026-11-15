@@ -9,7 +9,7 @@ export class SupabaseApi {
   constructor() {
     this.demo = false;
     this.sb = window.supabase.createClient(SB_URL, SB_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'crewcal-auth' },
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'whossup-auth' },
     });
     this.user = null;
   }

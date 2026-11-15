@@ -83,7 +83,7 @@ class Chrome:
     def __init__(self, width=390, height=844, dpr=2, port=9333, profile=None, mobile=True):
         self.w, self.h, self.dpr, self.mobile = width, height, dpr, mobile
         self.port = port
-        self.profile = profile or os.path.join(os.environ.get("TMPDIR", "/tmp"), f"crewcal-cdp-{port}")
+        self.profile = profile or os.path.join(os.environ.get("TMPDIR", "/tmp"), f"whossup-cdp-{port}")
         self.msg_id = 0
         self.logs = []
 

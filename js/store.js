@@ -67,8 +67,8 @@ export async function boot(api) {
   S.api = api;
   const q = new URLSearchParams(location.search);
   const join = q.get('join');
-  if (join) { S.pendingInvite = join.toUpperCase(); try { sessionStorage.setItem('crewcal-join', S.pendingInvite); } catch {} }
-  else try { S.pendingInvite = sessionStorage.getItem('crewcal-join'); } catch {}
+  if (join) { S.pendingInvite = join.toUpperCase(); try { sessionStorage.setItem('whossup-join', S.pendingInvite); } catch {} }
+  else try { S.pendingInvite = sessionStorage.getItem('whossup-join'); } catch {}
   const tab = q.get('tab'); if (['calendar', 'plans', 'chat', 'money', 'crew'].includes(tab)) S.tab = tab;
   if (join || tab) history.replaceState(null, '', location.pathname + (q.get('demo') ? '?demo=1' : ''));
 
@@ -92,7 +92,7 @@ export async function afterSignIn() {
 
 export async function refreshGroups() {
   S.groups = await S.api.myGroups();
-  let saved; try { saved = localStorage.getItem('crewcal-gid'); } catch {}
+  let saved; try { saved = localStorage.getItem('whossup-gid'); } catch {}
   const usable = S.groups.filter(g => g.status === 'active');
   if (!S.groups.find(g => g.id === S.gid)) S.gid = (usable.find(g => g.id === saved) || usable[0] || S.groups[0])?.id || null;
 }
@@ -107,7 +107,7 @@ export function route() {
 }
 
 export async function switchCrew(gid) {
-  S.gid = gid; try { localStorage.setItem('crewcal-gid', gid); } catch {}
+  S.gid = gid; try { localStorage.setItem('whossup-gid', gid); } catch {}
   S.crew = emptyCrew(); S.plans.results = []; S.plans.places = []; S.chat.unread = 0;
   route();
 }
@@ -140,7 +140,7 @@ export async function loadCrew(quiet = false) {
   S.syncing = false; render();
 }
 
-function seenKey() { return 'crewcal-seen-' + S.gid; }
+function seenKey() { return 'whossup-seen-' + S.gid; }
 function countUnread() {
   let seen = 0; try { seen = +localStorage.getItem(seenKey()) || 0; } catch {}
   return S.crew.messages.filter(m => m.id > seen && m.user_id !== me()).length;
@@ -244,7 +244,7 @@ export async function createCrew(name, emoji) {
 }
 export async function joinCrew(code) {
   const r = await S.api.joinGroup(code);
-  S.pendingInvite = null; try { sessionStorage.removeItem('crewcal-join'); } catch {}
+  S.pendingInvite = null; try { sessionStorage.removeItem('whossup-join'); } catch {}
   await refreshGroups(); await switchCrew(r.group_id); return r;
 }
 export function inviteLink(code = group()?.invite_code) {

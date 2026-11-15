@@ -35,7 +35,7 @@ for name, (w, h, mobile) in {"phone": (390, 844, True), "desktop": (1440, 900, F
         c.cmd("Emulation.setEmulatedMedia", {"features": [{"name": "prefers-color-scheme", "value": "dark"}]})
         c.goto(URL + "blank.html", wait=0.3); c.eval("localStorage.clear()")
         c.goto(URL + "?demo=1", wait=1.8)
-        c.eval("window.S = __crewcal.S; window.go = __crewcal.go; window.render = __crewcal.render; window.closeSheets = () => document.querySelectorAll('.scrim').forEach(s => s.remove()) || document.body.classList.remove('has-sheet')")
+        c.eval("window.S = __whossup.S; window.go = __whossup.go; window.render = __whossup.render; window.closeSheets = () => document.querySelectorAll('.scrim').forEach(s => s.remove()) || document.body.classList.remove('has-sheet')")
         for step, pre, click in STEPS:
             if pre: c.eval(pre); time.sleep(0.5)
             if click:

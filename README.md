@@ -1,6 +1,6 @@
-# CrewCal
+# Whossup
 
-**Find the day everyone's free.** Your crew marks their busy days; CrewCal shows the dates that work
+**Find the day everyone's free.** Your crew marks their busy days; Whossup shows the dates that work
 for all of you, then helps you plan it, split the bill and chat in one place.
 
 - **Shared availability**: one personal calendar, visible to every crew you're in. The calendar

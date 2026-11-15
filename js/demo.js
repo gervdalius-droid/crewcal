@@ -4,7 +4,7 @@
 import { iso, addDays, today, uid, sleep, parseDay, MONTHS } from './util.js';
 import { AI_FREE_MONTHLY } from './config.js';
 
-const KEY = 'crewcal-demo-v1';
+const KEY = 'whossup-demo-v1';
 const ME = 'u-me';
 
 function seed() {
@@ -98,7 +98,7 @@ export class DemoApi {
     if (persist && !fresh) { try { db = JSON.parse(localStorage.getItem(KEY)); } catch {} }
     this.db = db || seed();
     this.db.signedIn = true; // the demo always starts signed in
-    this.user = { id: ME, email: 'alex@demo.crewcal.app' };
+    this.user = { id: ME, email: 'alex@demo.whossup.app' };
     this.subs = {};
     this.save();
   }
@@ -113,7 +113,7 @@ export class DemoApi {
   // ── Auth ──
   async getSession() { return this.user; }
   onAuthChange(cb) { this._authCb = cb; }
-  async signIn() { await this.tick(); this.db.signedIn = true; this.save(); this.user = { id: ME, email: 'alex@demo.crewcal.app' }; this._authCb?.('SIGNED_IN', this.user); return this.user; }
+  async signIn() { await this.tick(); this.db.signedIn = true; this.save(); this.user = { id: ME, email: 'alex@demo.whossup.app' }; this._authCb?.('SIGNED_IN', this.user); return this.user; }
   async signUp() { await this.signIn(); return { needsConfirm: false }; }
   async magicLink() { await this.tick(); }
   async resetPassword() { await this.tick(); }

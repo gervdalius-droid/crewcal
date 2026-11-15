@@ -16,7 +16,7 @@ def fresh(c, q="?demo=1"):
     c.goto(URL + q, wait=1.8)
 
 def tab(c, t):
-    c.eval(f"window.__crewcal.go('{t}')")
+    c.eval(f"window.__whossup.go('{t}')")
     time.sleep(0.6)
 
 errors = []

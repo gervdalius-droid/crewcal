@@ -8,4 +8,4 @@ export const AI_FREE_MONTHLY = 25;
 
 // Pricing shown on the upgrade sheet. Billing is not wired yet.
 export const PRO_PRICE = { month: '€4.99', year: '€39' };
-export const SUPPORT_EMAIL = 'hello@crewcal.app';
+export const SUPPORT_EMAIL = 'hello@whossup.app';

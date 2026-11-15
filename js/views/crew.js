@@ -22,7 +22,7 @@ export function crewView() {
     h('div.inv-link', h('span.inv-url', link.replace(/^https?:\/\//, '')),
       h('button.btn.sm.soft', { onclick: async () => { await copy(link); toast('Invite link copied', 'ok'); } }, icon('copy', 15), 'Copy')),
     h('div.row.gap',
-      h('button.btn.primary.grow', { onclick: () => share({ title: 'Join ' + g.name + ' on CrewCal', text: 'Join ' + g.emoji + ' ' + g.name + ' on CrewCal so we can find a day everyone’s free:', url: link }).then(r => r === 'copied' && toast('Invite link copied', 'ok')) }, icon('share', 17), 'Share invite'),
+      h('button.btn.primary.grow', { onclick: () => share({ title: 'Join ' + g.name + ' on Whossup', text: 'Join ' + g.emoji + ' ' + g.name + ' on Whossup so we can find a day everyone’s free:', url: link }).then(r => r === 'copied' && toast('Invite link copied', 'ok')) }, icon('share', 17), 'Share invite'),
       admin ? h('button.btn.ghost', { title: 'Make a new link — the old one stops working', onclick: async () => { if (await confirmSheet({ title: 'Reset invite link?', text: 'The current link and code stop working. Members stay in the crew.', ok: 'Reset' })) attempt(rotateInvite, 'New invite link ready'); } }, icon('refresh', 16)) : null)));
 
   const pend = pending();
@@ -117,7 +117,7 @@ export function joinForm(f, submit) {
 
 // Invite link landing: "Join Weekend Crew?" with a live preview.
 export function openInviteSheet(code) {
-  const s = openSheet({ title: 'You’re invited', onClose: () => { S.pendingInvite = null; try { sessionStorage.removeItem('crewcal-join'); } catch {} } }, async (body) => {
+  const s = openSheet({ title: 'You’re invited', onClose: () => { S.pendingInvite = null; try { sessionStorage.removeItem('whossup-join'); } catch {} } }, async (body) => {
     body.append(h('div.loading', h('span.spin')));
     const pv = await S.api.previewGroup(code).catch(() => null);
     body.replaceChildren();
@@ -141,7 +141,7 @@ export function openCrewSwitcher() {
 export function openProfile() {
   const f = { name: S.profile.name, color: S.profile.color };
   openSheet({ title: 'You' }, (body, sheet) => {
-    const theme = localStorage.getItem('crewcal-theme') || 'auto';
+    const theme = localStorage.getItem('whossup-theme') || 'auto';
     const importedCount = S.crew.busy.filter(b => b.user_id === me() && b.source === 'import').length;
     const fileIn = h('input', { type: 'file', accept: '.ics,text/calendar', hidden: true, onchange: async e => {
       const file = e.target.files[0]; if (!file) return;
@@ -160,27 +160,27 @@ export function openProfile() {
       } }, 'Save profile'),
 
       h('div.section', h('div.sec-head', h('h4', 'Plan')),
-        h('div.plan-row', h('div', h('b', S.profile.plan === 'pro' ? 'CrewCal Pro' : 'Free'), h('div.muted.small', S.usage.used + ' of ' + (S.profile.plan === 'pro' ? '∞' : S.usage.limit) + ' AI searches used this month')),
+        h('div.plan-row', h('div', h('b', S.profile.plan === 'pro' ? 'Whossup Pro' : 'Free'), h('div.muted.small', S.usage.used + ' of ' + (S.profile.plan === 'pro' ? '∞' : S.usage.limit) + ' AI searches used this month')),
           S.profile.plan !== 'pro' ? h('button.btn.sm.iris', { onclick: () => openUpgrade() }, icon('crown', 15), 'Go Pro') : null)),
 
       h('div.section', h('div.sec-head', h('h4', 'Calendar sync')),
         h('div.menu',
           h('button.menu-i', { onclick: () => fileIn.click() }, icon('upload'), h('span.grow', 'Import busy days from .ics', h('span.menu-sub', 'Google, Apple or Outlook calendar export')), fileIn),
           importedCount ? h('button.menu-i', { onclick: async () => { if (await confirmSheet({ title: 'Remove imported days?', text: importedCount + ' imported busy days will be cleared. Days you marked by hand stay.', ok: 'Remove' })) { await attempt(clearImported, 'Imported days removed'); sheet.redraw(); } } }, icon('trash'), h('span.grow', 'Clear ' + importedCount + ' imported days')) : null,
-          h('button.menu-i', { onclick: () => { const evs = S.crew.events.filter(e => e.status === 'planned' && S.crew.rsvps.some(r => r.event_id === e.id && r.user_id === me() && r.status !== 'no')); if (!evs.length) return toast('RSVP to a plan first', 'err'); download('crewcal.ics', eventsToIcs(evs, group()?.name), 'text/calendar'); } }, icon('download'), h('span.grow', 'Export my plans (.ics)')))),
+          h('button.menu-i', { onclick: () => { const evs = S.crew.events.filter(e => e.status === 'planned' && S.crew.rsvps.some(r => r.event_id === e.id && r.user_id === me() && r.status !== 'no')); if (!evs.length) return toast('RSVP to a plan first', 'err'); download('whossup.ics', eventsToIcs(evs, group()?.name), 'text/calendar'); } }, icon('download'), h('span.grow', 'Export my plans (.ics)')))),
 
       h('div.section', h('div.sec-head', h('h4', 'Appearance')),
-        segmented([['auto', 'Auto'], ['dark', 'Dark'], ['light', 'Light']], theme, v => { try { localStorage.setItem('crewcal-theme', v); } catch {} applyTheme(); sheet.redraw(); }, 'grow')),
+        segmented([['auto', 'Auto'], ['dark', 'Dark'], ['light', 'Light']], theme, v => { try { localStorage.setItem('whossup-theme', v); } catch {} applyTheme(); sheet.redraw(); }, 'grow')),
 
       h('div.section', h('div.menu',
         S.api.demo ? h('button.menu-i', { onclick: () => { S.api.reset(); location.reload(); } }, icon('refresh'), h('span.grow', 'Reset demo data')) : null,
-        h('a.menu-i', { href: 'mailto:' + SUPPORT_EMAIL + '?subject=CrewCal%20feedback' }, icon('mail'), h('span.grow', 'Send feedback')),
+        h('a.menu-i', { href: 'mailto:' + SUPPORT_EMAIL + '?subject=Whossup%20feedback' }, icon('mail'), h('span.grow', 'Send feedback')),
         h('button.menu-i.danger-text', { onclick: async () => { if (await confirmSheet({ title: 'Sign out?', ok: 'Sign out' })) { await S.api.signOut(); if (S.api.demo) location.href = location.pathname; } } }, icon('logout'), h('span.grow', S.api.demo ? 'Leave demo' : 'Sign out')))));
   });
 }
 
 export function applyTheme() {
-  let t = 'auto'; try { t = localStorage.getItem('crewcal-theme') || 'auto'; } catch {}
+  let t = 'auto'; try { t = localStorage.getItem('whossup-theme') || 'auto'; } catch {}
   if (t === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t);
   const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#07070b' : '#f6f5f9');
@@ -189,7 +189,7 @@ export function applyTheme() {
 // ── Pro ──────────────────────────────────────────────────────
 export function openUpgrade(reason) {
   const st = { period: 'year', sent: false, email: S.user?.email || '' };
-  openSheet({ title: 'CrewCal Pro', cls: 'pro-sheet' }, (body, sheet) => {
+  openSheet({ title: 'Whossup Pro', cls: 'pro-sheet' }, (body, sheet) => {
     body.append(
       h('div.pro-hero', h('div.pro-ball', '🪩'), h('h2', 'Plan more, argue less'), reason ? h('p.pro-reason', reason) : h('p.muted', 'Everything in Free, plus:')),
       h('ul.pro-list', [
