@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs>
+<linearGradient id="disco" gradientUnits="userSpaceOnUse" x1="170" y1="220" x2="860" y2="800">
+  <stop offset="0" stop-color="#7c5cff"/><stop offset="0.55" stop-color="#ec4899"/><stop offset="1" stop-color="#fb7185"/></linearGradient>
+<linearGradient id="pop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#a3e635"/></linearGradient>
+<radialGradient id="glow" cx="0.5" cy="0.42" r="0.62"><stop offset="0" stop-color="#ec4899" stop-opacity="0.38"/><stop offset="1" stop-color="#ec4899" stop-opacity="0"/></radialGradient>
+<radialGradient id="halo"><stop offset="0.45" stop-color="#ec4899" stop-opacity="0.45"/><stop offset="1" stop-color="#ec4899" stop-opacity="0"/></radialGradient>
+<radialGradient id="popglowr"><stop offset="0.5" stop-color="#a3e635" stop-opacity="0.7"/><stop offset="1" stop-color="#a3e635" stop-opacity="0"/></radialGradient>
+<linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.28"/><stop offset="0.5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+<rect width="1024" height="1024" rx="232" fill="#0b0a12"/><rect width="1024" height="1024" rx="232" fill="url(#glow)"/>
+<g transform="translate(0.0,0.0) scale(1.0)"><path d="M178 134 Q184.12 161.88 212 168 Q184.12 174.12 178 202 Q171.88 174.12 144 168 Q171.88 161.88 178 134Z" fill="#fff" opacity="0.85"/><path d="M866 170 Q870.68 191.32 892 196 Q870.68 200.68 866 222 Q861.32 200.68 840 196 Q861.32 191.32 866 170Z" fill="#bff5ff" opacity="0.85"/><path d="M872 830 Q877.4 854.6 902 860 Q877.4 865.4 872 890 Q866.6 865.4 842 860 Q866.6 854.6 872 830Z" fill="#d6ff9e" opacity="0.8"/>
+<ellipse cx="512" cy="520" rx="440" ry="360" fill="url(#halo)"/>
+<rect x="168" y="250" width="688" height="460" rx="230" fill="url(#disco)"/>
+<path d="M300 640 L250 822 L452 690 Z" fill="url(#disco)" stroke="url(#disco)" stroke-width="30" stroke-linejoin="round"/>
+<rect x="168" y="250" width="688" height="460" rx="230" fill="url(#sheen)"/>
+<circle cx="358" cy="540" r="52" fill="#fff"/>
+<circle cx="512" cy="480" r="52" fill="#fff"/>
+<circle cx="666" cy="404" r="96" fill="url(#popglowr)"/>
+<circle cx="666" cy="404" r="58" fill="url(#pop)"/></g></svg>

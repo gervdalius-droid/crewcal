@@ -78,7 +78,7 @@ function shell() {
       meBtn));
 
   const side = h('aside.rail',
-    h('div.rail-logo', h('img', { src: 'img/mark.png', alt: '', width: 36, height: 36 }), h('span.wordmark', 'whossup')),
+    h('div.rail-logo', h('img', { src: 'img/mark.png', alt: '', width: 36, height: 36 }), h('span.wordmark', 'whos', h('span.wm-sup', 'sup'))),
     h('button.crew-switch.rail-crew', { onclick: openCrewSwitcher }, h('span.crew-e', g?.emoji || '🪩'), h('span.crew-n', g?.name || 'Crew'), icon('chevD', 16)),
     nav('rail-nav'),
     h('div.rail-foot', !S.online ? h('div.offline.mb-s', 'Offline — changes will fail') : null, h('button.rail-me', { onclick: openProfile }, avatar({ name: S.profile?.name, color: S.profile?.color }, 32), h('span', S.profile?.name || ''), S.api.demo ? h('span.demo-tag', 'Demo') : null)));

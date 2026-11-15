@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs>
+<linearGradient id="disco" gradientUnits="userSpaceOnUse" x1="170" y1="220" x2="860" y2="800">
+  <stop offset="0" stop-color="#7c5cff"/><stop offset="0.55" stop-color="#ec4899"/><stop offset="1" stop-color="#fb7185"/></linearGradient>
+<linearGradient id="pop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#a3e635"/></linearGradient>
+<radialGradient id="glow" cx="0.5" cy="0.42" r="0.62"><stop offset="0" stop-color="#ec4899" stop-opacity="0.38"/><stop offset="1" stop-color="#ec4899" stop-opacity="0"/></radialGradient>
+<radialGradient id="halo"><stop offset="0.45" stop-color="#ec4899" stop-opacity="0.45"/><stop offset="1" stop-color="#ec4899" stop-opacity="0"/></radialGradient>
+<radialGradient id="popglowr"><stop offset="0.5" stop-color="#a3e635" stop-opacity="0.7"/><stop offset="1" stop-color="#a3e635" stop-opacity="0"/></radialGradient>
+<linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.28"/><stop offset="0.5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+<rect width="1024" height="1024" rx="232" fill="#0b0a12"/><rect width="1024" height="1024" rx="232" fill="url(#glow)"/>
+<g transform="translate(-40.960000000000036,-40.960000000000036) scale(1.08)">
+<ellipse cx="512" cy="520" rx="440" ry="360" fill="url(#halo)"/>
+<rect x="168" y="250" width="688" height="460" rx="230" fill="url(#disco)"/>
+<path d="M300 640 L250 822 L452 690 Z" fill="url(#disco)" stroke="url(#disco)" stroke-width="30" stroke-linejoin="round"/>
+<rect x="168" y="250" width="688" height="460" rx="230" fill="url(#sheen)"/>
+<circle cx="358" cy="540" r="52" fill="#fff"/>
+<circle cx="512" cy="480" r="52" fill="#fff"/>
+<circle cx="666" cy="404" r="96" fill="url(#popglowr)"/>
+<circle cx="666" cy="404" r="58" fill="url(#pop)"/></g></svg>

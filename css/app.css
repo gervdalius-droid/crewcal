@@ -200,7 +200,8 @@ button.linkish.center { display: flex; margin-left: auto; margin-right: auto; }
   .rail { display: flex; flex-direction: column; width: 248px; flex-shrink: 0; padding: 18px 14px; border-right: 1px solid var(--line); background: var(--bg2); gap: 14px; }
   .rail-logo { display: flex; align-items: center; gap: 10px; padding: 0 6px 6px; }
   .rail-logo img { border-radius: 10px; }
-  .wordmark { font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: -.02em; background: var(--chrome); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .wordmark { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: -.02em; color: var(--text); }
+  .wm-sup { background: linear-gradient(90deg, #a78bfa, #ec4899 55%, #fb7185); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .rail-crew { max-width: none; width: 100%; justify-content: flex-start; }
   .rail-crew .crew-n { flex: 1; text-align: left; }
   .rail-nav { display: flex; flex-direction: column; gap: 2px; }
@@ -320,7 +321,7 @@ button.linkish.center { display: flex; margin-left: auto; margin-right: auto; }
 
 .welcome { align-items: flex-start; }
 .welcome-in { position: relative; width: 100%; max-width: 460px; margin: 0 auto; text-align: center; padding-top: 2vh; }
-.welcome-logo { width: min(240px, 58vw); height: auto; display: block; margin: -10px auto -18px; mix-blend-mode: screen; }
+.welcome-logo { width: min(220px, 54vw); height: auto; display: block; margin: -14px auto 6px; mix-blend-mode: screen; }
 :root[data-theme="light"] .welcome-logo { mix-blend-mode: normal; border-radius: 32px; width: min(170px, 44vw); margin: 0 auto 14px; }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .welcome-logo { mix-blend-mode: normal; border-radius: 32px; width: min(170px, 44vw); margin: 0 auto 14px; } }
 .welcome-h { font-size: clamp(32px, 8.4vw, 46px); line-height: 1.04; letter-spacing: -.03em; margin-bottom: 14px; font-weight: 700; }
