@@ -236,7 +236,6 @@ function looksLikeRequest(t) {
 
 function discover() {
   const P = S.plans;
-  if (!P.months.length) { const m = today().getMonth(); P.months = [m, (m + 1) % 12, (m + 2) % 12]; }
   const box = h('div.discover');
   const quota = h('div.quota', h('span', icon('sparkles', 14, 'iris'), (S.usage.limit - S.usage.used) + ' AI searches left this month'), S.profile?.plan !== 'pro' ? h('button.linkish', { onclick: () => openUpgrade() }, 'Go Pro') : null);
   box.append(h('div.row.between.wrap.gap', segmented([['events', 'Events & trips'], ['places', 'Places nearby']], P.mode, v => { P.mode = v; P.error = ''; render(); }), quota));
@@ -270,7 +269,8 @@ function discover() {
       const mNow = today().getMonth(), yNow = today().getFullYear();
       if (P.mode === 'events') {
         // Month chips run from this month forward, so earlier month numbers mean next year.
-        const months = (P.months.length ? P.months : [mNow]).map(m => (m < mNow ? yNow + 1 : yNow) + '-' + String(m + 1).padStart(2, '0')).sort();
+        // No month picked = the whole year ahead, so the request itself ("spring 2027") decides the dates.
+        const months = (P.months.length ? P.months : Array.from({ length: 12 }, (_, i) => (mNow + i) % 12)).map(m => (m < mNow ? yNow + 1 : yNow) + '-' + String(m + 1).padStart(2, '0')).sort();
         const text = await ai('events', { query: P.query, months, categories: P.cats, near: P.near });
         const arr = parseJsonArray(text);
         if (!arr?.length) throw new Error('No results — try different words');
@@ -338,7 +338,7 @@ function placeCard(p) {
 // ── Trip planner ─────────────────────────────────────────────
 export function openTripSheet(ev) {
   const going = ev.id ? rsvpsFor(ev.id).filter(r => r.status === 'going').length : 0;
-  const t = { origin: localStorage.getItem('whossup-origin') || '', guests: Math.max(2, going || active().length || 2), plan: null, loading: false, error: '' };
+  const t = { origin: localStorage.getItem('whossup-origin') || '', guests: Math.max(2, going || active().length || 2), plan: ev.trip_plan || null, loading: false, error: '' };
   const nights = Math.max(1, daysBetween(ev.starts_on, ev.ends_on) || 1);
   openSheet({ title: 'Plan the trip', wide: true }, (body, sheet) => {
     const b = tripBudget(ev.location, nights, t.guests, ev.price_min ? +ev.price_min : 0);
@@ -377,6 +377,7 @@ export function openTripSheet(ev) {
       if (p.todo.length) plan.append(h('div.tp-sec', h('h4', icon('ticket', 16), 'Things to do'),
         h('div.tp-todo', p.todo.map(x => out(todoLink({ name: x.name, location: ev.location }, AFFILIATE), '.tp-chip', h('b', x.name), x.why ? h('span', x.why) : null)))));
       if (p.tips) plan.append(h('div.ai-box', h('div.ai-head', icon('sparkles', 15, 'iris'), 'Good to know'), h('p', p.tips)));
+      plan.append(h('button.linkish.center.mt', { onclick: () => { t.plan = null; sheet.redraw(); } }, 'Plan again'));
     } else if (t.loading) plan.append(spinner('Planning your trip…'));
     else plan.append(h('button.btn.disco.lg.block', { onclick: async () => {
       t.loading = true; sheet.redraw();
@@ -398,6 +399,8 @@ export function openTripSheet(ev) {
           todo: arr(o.todo).slice(0, 5).map(x => ({ name: str(x.name, 60), why: str(x.why, 100) })).filter(x => x.name),
           tips: str(o.tips, 500),
         };
+        // Already-saved plan or idea: keep the AI plan with it so the whole crew sees it.
+        if (ev.id) { try { const row = await saveEvent({ ...ev, trip_plan: t.plan }); Object.assign(ev, row); if (row.trip_plan) toast('Trip plan saved for the crew', 'ok'); } catch (e) {} }
       } catch (e) { aiError(e); }
       t.loading = false; sheet.redraw();
     } }, icon('sparkles', 18), 'Plan it for us — travel, stays & things to do'));
@@ -406,7 +409,7 @@ export function openTripSheet(ev) {
     body.append(h('div.sec-head.mt', h('h4', 'Book it')),
       h('div.links-grid', links.map(l => out(l.url, '.link-card', icon(l.icon, 20), h('span.lc-t', l.label), h('span.lc-s', l.sub)))),
       h('p.muted.tiny', 'Booking links open our partners’ sites. We may earn a small commission when you book — it never costs you extra.'));
-    if (!ev.id) body.append(h('button.btn.primary.block.mt', { onclick: async () => { const row = await attempt(() => saveEvent({ ...ev, status: 'idea' }), 'Saved to Ideas'); if (row) sheet.close(); } }, icon('star', 16), 'Save as idea for the crew'));
+    if (!ev.id) body.append(h('button.btn.primary.block.mt', { onclick: async () => { const row = await attempt(() => saveEvent({ ...ev, status: 'idea', ...(t.plan ? { trip_plan: t.plan } : {}) }), 'Saved to Ideas'); if (row) sheet.close(); } }, icon('star', 16), 'Save as idea for the crew'));
   });
 }
 

@@ -101,7 +101,10 @@ export class SupabaseApi {
     const row = { ...ev }; delete row.created_at;
     const q = ev.id ? this.sb.from('events').update(row).eq('id', ev.id).select().single()
                     : this.sb.from('events').insert(row).select().single();
-    const { data, error } = await q; fail(error); return data;
+    let { data, error } = await q;
+    // Database not migrated yet (004_trip_plan.sql): save the event without the plan rather than failing.
+    if (error && /trip_plan/.test(error.message || '') && 'trip_plan' in row) { const r2 = { ...ev }; delete r2.trip_plan; return this.saveEvent(r2); }
+    fail(error); return data;
   }
   async deleteEvent(id) { const { error } = await this.sb.from('events').delete().eq('id', id); fail(error); }
   async rsvps(eventIds) {
