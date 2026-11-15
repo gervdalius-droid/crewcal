@@ -706,3 +706,13 @@ details.past .stack { opacity: .7; margin-top: 8px; }
   .wstep-ic { display: none; }
   .welcome-steps::before { left: 20px; }
 }
+
+/* ── Guest accounts ───────────────────────────────────────── */
+.no-signup { display: flex; align-items: center; gap: 6px; margin: 14px 0 0; font-size: 14px; color: var(--text2); }
+.no-signup svg { color: var(--ok); }
+.invite-banner { display: flex; align-items: center; gap: 10px; padding: 10px 14px; margin-bottom: 18px; border-radius: 14px; background: var(--iris-soft); border: 1px solid var(--line2); font-size: 14.5px; }
+.invite-banner .crew-e { font-size: 22px; }
+.save-acc { margin: 4px 0 14px; padding: 14px; border-radius: 16px; background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--disco) border-box; border: 1.5px solid transparent; }
+.save-acc-h { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; color: var(--text); }
+.save-acc-h svg { color: #ec4899; }
+.save-acc input { min-width: 0; }

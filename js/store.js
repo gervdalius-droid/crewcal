@@ -15,6 +15,7 @@ export const S = {
   chat: { draft: '', unread: 0 },
   usage: { used: 0, limit: 25 },
   pendingInvite: null,     // invite code from ?join= waiting for sign-in
+  invitePreview: null,     // { name, emoji, members } of that crew, for the name screen
   online: navigator.onLine,
   syncing: false,
 };
@@ -77,6 +78,8 @@ export async function boot(api) {
     if (ev === 'PASSWORD_RECOVERY') { S.recovery = true; render(); }
   });
   S.user = await api.getSession().catch(() => null);
+  // Opening an invite link: create the account silently, so all they do is type a name.
+  if (!S.user && S.pendingInvite) { try { await startGuest(); return; } catch (e) { console.warn('guest sign-in failed', e); } }
   if (!S.user) { S.screen = 'welcome'; render(); return; }
   await afterSignIn();
 }
@@ -84,10 +87,29 @@ export async function boot(api) {
 export async function afterSignIn() {
   S.user = await S.api.getSession();
   S.profile = await S.api.getProfile().catch(() => null);
+  if (S.pendingInvite && !S.invitePreview) S.invitePreview = await S.api.previewGroup(S.pendingInvite).catch(() => null);
   if (!S.profile) { S.screen = 'profile'; render(); return; }
   await refreshGroups();
-  if (S.pendingInvite) { render(); return; } // app.js shows the join sheet
+  if (S.pendingInvite) return autoJoin();
   route();
+}
+
+export async function startGuest() {
+  S.user = await S.api.startGuest();
+  await afterSignIn();
+}
+
+// Invite links join straight away — no extra "Join" tap.
+export async function autoJoin() {
+  const code = S.pendingInvite;
+  try {
+    const r = await joinCrew(code);
+    toast(r.status === 'active' ? 'Welcome to ' + r.name + ' 🎉' : 'Request sent — an admin will let you in', 'ok');
+  } catch (e) {
+    S.pendingInvite = null; try { sessionStorage.removeItem('whossup-join'); } catch {}
+    toast('That invite link doesn’t work any more — ask for a new one', 'err');
+    route();
+  } finally { S.invitePreview = null; }
 }
 
 export async function refreshGroups() {

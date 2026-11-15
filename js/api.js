@@ -3,6 +3,7 @@
 //   DemoApi     — in-browser sandbox for ?demo=1 and tests (demo.js)
 import { SB_URL, SB_KEY, AI_FREE_MONTHLY } from './config.js';
 
+const toUser = u => ({ id: u.id, email: u.email || u.new_email || '', guest: !!u.is_anonymous && !u.email });
 const fail = (error) => { if (error) throw new Error(error.message || String(error)); };
 
 export class SupabaseApi {
@@ -17,12 +18,12 @@ export class SupabaseApi {
   // ── Auth ──
   async getSession() {
     const { data } = await this.sb.auth.getSession();
-    this.user = data.session ? { id: data.session.user.id, email: data.session.user.email } : null;
+    this.user = data.session ? toUser(data.session.user) : null;
     return this.user;
   }
   onAuthChange(cb) {
     this.sb.auth.onAuthStateChange((ev, session) => {
-      this.user = session ? { id: session.user.id, email: session.user.email } : null;
+      this.user = session ? toUser(session.user) : null;
       cb(ev, this.user);
     });
   }
@@ -37,6 +38,10 @@ export class SupabaseApi {
   async resetPassword(email) { const { error } = await this.sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }); fail(error); }
   async updatePassword(password) { const { error } = await this.sb.auth.updateUser({ password }); fail(error); }
   async signOut() { await this.sb.auth.signOut(); this.user = null; }
+  // No email, no password: a real (anonymous) account row is created and RLS applies as usual.
+  async startGuest() { const { error } = await this.sb.auth.signInAnonymously(); fail(error); return this.getSession(); }
+  // Turns a guest into a normal account: Supabase emails a confirmation link; afterwards they can sign in with an email link anywhere.
+  async saveEmail(email) { const { error } = await this.sb.auth.updateUser({ email }, { emailRedirectTo: location.origin + location.pathname }); fail(error); }
 
   // ── Profile ──
   async getProfile() {

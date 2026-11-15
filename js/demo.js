@@ -115,6 +115,8 @@ export class DemoApi {
   onAuthChange(cb) { this._authCb = cb; }
   async signIn() { await this.tick(); this.db.signedIn = true; this.save(); this.user = { id: ME, email: 'alex@demo.whossup.app' }; this._authCb?.('SIGNED_IN', this.user); return this.user; }
   async signUp() { await this.signIn(); return { needsConfirm: false }; }
+  async startGuest() { return this.signIn(); }
+  async saveEmail() { await this.tick(); }
   async magicLink() { await this.tick(); }
   async resetPassword() { await this.tick(); }
   async updatePassword() { await this.tick(); }

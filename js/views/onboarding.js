@@ -1,6 +1,6 @@
 import { h, icon, avatar, PALETTE, iso, today, addDays, DOW } from '../util.js';
-import { S, render, afterSignIn, refreshGroups, route, createCrew, joinCrew, toast, friendly, attempt, group } from '../store.js';
-import { crewCreateForm, joinForm } from './crew.js';
+import { S, render, afterSignIn, refreshGroups, route, createCrew, joinCrew, toast, friendly, attempt, group, startGuest, autoJoin } from '../store.js';
+import { crewCreateForm, joinForm, signOutFlow } from './crew.js';
 import { segmented } from '../ui.js';
 
 const auth = { mode: 'signin', email: '', password: '', busy: false, sent: '', err: '' };
@@ -11,6 +11,11 @@ export function welcomeScreen() {
   ['_m_maa_', 'm___aam', '_mm_maa', '__maaa_', 'm__m_aa'].join('').split('').forEach((v, i) =>
     grid.append(h('span.hg' + (v === 'a' ? '.all' : v === 'm' ? '.most' : ''), { style: { animationDelay: (i * 28) + 'ms' } })));
   const go = mode => () => { auth.mode = mode; S.screen = 'auth'; render(); };
+  let starting = false;
+  const start = async e => {   // no email, no password — just start
+    if (starting) return; starting = true; e.currentTarget.disabled = true; e.currentTarget.textContent = 'One moment…';
+    try { await startGuest(); } catch (err) { toast(friendly(err), 'err'); starting = false; render(); }
+  };
   return h('div.onb.welcome',
     h('div.onb-glow'),
     h('div.welcome-in',
@@ -20,9 +25,10 @@ export function welcomeScreen() {
           h('h1.welcome-h', 'Find the day', h('br'), h('span.disco-text', 'everyone’s free.')),
           h('p.welcome-p', 'Shared availability, plans, AI trip ideas and bill splitting for your crew.'),
           h('div.welcome-cta',
-            h('button.btn.disco.lg', { onclick: go('signup') }, 'Get started — it’s free'),
+            h('button.btn.disco.lg', { onclick: start }, 'Get started — it’s free'),
             h('button.btn.ghost.lg', { onclick: go('signin') }, 'I already have an account')),
-          h('a.demo-link', { href: '?demo=1' }, icon('sparkles', 15), 'Try the demo crew — no sign-up'),
+          h('p.no-signup', icon('check', 15), 'No email, no password — just your name.'),
+          h('a.demo-link', { href: '?demo=1' }, icon('sparkles', 15), 'Try the demo crew first'),
           S.pendingInvite ? h('div.invite-note', icon('link', 16), 'You’ve been invited to a crew — sign in to join.') : null),
         grid),
       h('ol.welcome-steps',
@@ -90,19 +96,21 @@ export function profileScreen() {
   const upd = () => preview.replaceChildren(avatar({ name: prof.name || '?', color: prof.color }, 72));
   upd();
   const name = h('input', { placeholder: 'e.g. Alex', maxlength: 40, value: prof.name, autofocus: true, autocomplete: 'given-name', oninput: e => { prof.name = e.target.value; upd(); }, onkeydown: e => e.key === 'Enter' && save() });
+  const inv = S.invitePreview;
   return h('div.onb', h('div.onb-glow'), h('div.onb-card',
-    h('div.steps', h('i.on'), h('i'), h('i')),
+    inv ? h('div.invite-banner', h('span.crew-e', inv.emoji), h('span', 'You’re invited to ', h('b', inv.name), inv.members ? h('span.muted', ' · ' + inv.members + ' in the crew') : null))
+        : h('div.steps', h('i.on'), h('i'), h('i')),
     preview,
     h('h1.onb-h', 'What should your crew call you?'),
     h('label.field', h('span.flabel', 'Your name'), name),
     h('div.field', h('span.flabel', 'Pick your colour'), h('div.color-pick', PALETTE.map(c => h('button' + (prof.color === c ? '.on' : ''), { style: { '--c': c }, 'aria-label': c, onclick: e => { prof.color = c; e.currentTarget.parentNode.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === e.currentTarget)); upd(); } })))),
-    h('button.btn.iris.lg.block.mt', { onclick: save }, 'Continue')));
+    h('button.btn.iris.lg.block.mt', { onclick: save }, inv ? 'Join ' + inv.name : 'Continue')));
   async function save() {
     if (!prof.name.trim()) return toast('Enter your name', 'err');
     const p = await attempt(() => S.api.saveProfile({ name: prof.name.trim(), color: prof.color }));
     if (!p) return;
     S.profile = p; await refreshGroups();
-    if (S.pendingInvite) { render(); return; }
+    if (S.pendingInvite) return autoJoin();
     route();
   }
 }
@@ -116,7 +124,7 @@ export function crewScreen() {
     segmented([['create', 'Create a crew'], ['join', 'I have a code']], cf.tab, v => { cf.tab = v; render(); }, 'grow mb'));
   if (cf.tab === 'create') card.append(crewCreateForm(cf, null, async () => { const g = await attempt(() => createCrew(cf.name.trim(), cf.emoji)); if (g) { S.tab = 'crew'; render(); toast('Crew created — now invite your friends 🎉', 'ok'); } }));
   else card.append(joinForm(cf, async () => { const r = await attempt(() => joinCrew(cf.code)); if (r && r.status === 'active') toast('Welcome to ' + r.name + ' 🎉', 'ok'); }));
-  card.append(h('button.linkish.center.mt', { onclick: () => S.api.signOut() }, 'Sign out'));
+  card.append(h('button.linkish.center.mt', { onclick: signOutFlow }, 'Sign out'));
   return h('div.onb', h('div.onb-glow'), card);
 }
 
@@ -130,6 +138,6 @@ export function pendingScreen() {
     h('p.muted', 'An admin needs to let you in. You’ll get access as soon as they approve — usually within minutes.'),
     h('button.btn.soft.block.mt', { onclick: async () => { await attempt(refreshGroups); route(); if (group()?.status === 'pending') toast('Still waiting for approval'); } }, icon('refresh', 16), 'Check again'),
     others.length ? h('button.btn.ghost.block', { onclick: () => { S.gid = others[0].id; route(); } }, 'Open ' + others[0].name + ' instead') : null,
-    h('button.linkish.center.mt', { onclick: () => S.api.signOut() }, 'Sign out')));
+    h('button.linkish.center.mt', { onclick: signOutFlow }, 'Sign out')));
 }
 
