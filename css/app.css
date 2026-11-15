@@ -333,10 +333,44 @@ button.linkish.center { display: flex; margin-left: auto; margin-right: auto; }
 @keyframes pop { from { transform: scale(.4); opacity: 0; } }
 .welcome-cta { display: flex; flex-direction: column; gap: 10px; }
 .demo-link { display: inline-flex; align-items: center; gap: 6px; justify-content: center; margin-top: 6px; font-weight: 600; font-size: 14.5px; padding: 8px; }
-.welcome-feats { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 10px; text-align: left; }
-.welcome-feats li { display: flex; gap: 12px; align-items: center; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-s); color: var(--text2); font-size: 14px; }
-.welcome-feats .ic { color: var(--accent); }
-.welcome-feats b { color: var(--text); }
+/* How it works: three numbered steps joined by a rail */
+.welcome-steps { list-style: none; padding: 0; margin: 4px auto 26px; display: grid; gap: 10px; text-align: left; position: relative; max-width: 400px; }
+.welcome-steps::before { content: ''; position: absolute; left: 21px; top: 26px; bottom: 26px; width: 2px; background: var(--iris); opacity: .45; border-radius: 1px; }
+.wstep { position: relative; display: flex; align-items: center; gap: 12px; padding: 12px 14px 12px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; animation: stepin .45s backwards cubic-bezier(.2,.9,.3,1.1); }
+@keyframes stepin { from { opacity: 0; transform: translateY(8px); } }
+.wstep-n { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font: 700 12.5px var(--display); background: var(--iris); color: #0b0b12; box-shadow: 0 0 0 4px var(--bg); position: relative; }
+.wstep-ic { width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--accent-bg); color: var(--accent); }
+.wstep-txt { display: flex; flex-direction: column; min-width: 0; }
+.wstep-txt b { font-family: var(--display); font-size: 15.5px; font-weight: 600; color: var(--text); }
+.wstep-txt span { font-size: 13px; color: var(--muted); }
+@media (min-width: 760px) {
+  .welcome-in { max-width: 720px; }
+  .welcome-steps { max-width: none; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .welcome-steps::before { left: 40px; right: 40px; top: 31px; bottom: auto; width: auto; height: 2px; }
+  .wstep { flex-direction: column; align-items: flex-start; padding: 18px 16px 16px; gap: 10px; }
+  .wstep-n { box-shadow: 0 0 0 5px var(--surface); }
+  .wstep-ic { position: absolute; top: 14px; right: 14px; }
+  .welcome-cta, .hero-grid { max-width: 440px; margin-left: auto; margin-right: auto; }
+}
+
+/* Hover: a soft glow so the pointer target is obvious (mouse/trackpad only) */
+@media (hover: hover) and (pointer: fine) {
+  .btn, .chip, .iconbtn, .seg > button, .nav-i, .crew-switch, .best-row, .win, .action, .link-card, .menu-i, .crew-row, .rs, .rsvp-big button, .avail-toggle button, .demo-link {
+    transition: transform .15s, background .15s, box-shadow .2s, border-color .2s, color .15s, filter .2s;
+  }
+  .btn:hover:not(:disabled) { box-shadow: 0 0 0 1px var(--line2), 0 6px 22px color-mix(in srgb, var(--accent) 28%, transparent); transform: translateY(-1px); }
+  .btn.primary:hover:not(:disabled) { box-shadow: 0 0 0 3px var(--accent-bg), 0 8px 26px color-mix(in srgb, var(--accent) 40%, transparent); }
+  .btn.iris:hover:not(:disabled) { filter: brightness(1.07) saturate(1.1); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent), 0 10px 34px rgba(165,143,255,.55), 0 0 44px rgba(126,242,255,.25); }
+  .btn.ghost:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-bg); color: var(--text); box-shadow: 0 0 0 3px var(--accent-bg), 0 6px 22px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .btn.soft:hover:not(:disabled) { box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent), 0 6px 20px color-mix(in srgb, var(--accent) 28%, transparent); }
+  .btn.danger:hover:not(:disabled) { box-shadow: 0 0 0 3px var(--no-bg), 0 8px 24px color-mix(in srgb, var(--no) 40%, transparent); }
+  .chip:hover, .iconbtn:hover, .crew-switch:hover { border-color: color-mix(in srgb, var(--accent) 55%, transparent); box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .action:hover, .link-card:hover, .crew-row:hover, .win:hover, .best-row:hover { box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent), 0 6px 20px color-mix(in srgb, var(--accent) 16%, transparent); }
+  .rs:hover, .rsvp-big button:hover, .avail-toggle button:hover { border-color: var(--accent); box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 30%, transparent); }
+  .demo-link:hover { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 60%, transparent)); }
+  .ev-card:hover, .res-card:hover { border-color: color-mix(in srgb, var(--accent) 40%, transparent); box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 14%, transparent); }
+  .cell:hover:not(.past) { box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--accent) 60%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 25%, transparent); }
+}
 .invite-note { margin-top: 16px; display: flex; gap: 8px; align-items: center; justify-content: center; color: var(--accent); font-weight: 600; font-size: 14px; }
 
 /* ── Calendar ─────────────────────────────────────────────── */
@@ -641,4 +675,14 @@ details.past .stack { opacity: .7; margin-top: 8px; }
 /* ── Motion preferences ───────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
+
+/* Phones: steps already tell the story, keep the call-to-action above the fold */
+@media (max-width: 759px) {
+  .hero-grid { display: none; }
+  .welcome-logo { width: min(200px, 50vw); }
+  .welcome-steps { gap: 8px; margin-bottom: 22px; }
+  .wstep { padding: 10px 12px 10px 9px; gap: 10px; }
+  .wstep-ic { display: none; }
+  .welcome-steps::before { left: 20px; }
 }

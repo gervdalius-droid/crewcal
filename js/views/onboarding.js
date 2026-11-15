@@ -15,16 +15,18 @@ export function welcomeScreen() {
     h('div.welcome-in',
       h('img.welcome-logo', { src: 'img/logo.png', alt: 'crewcal', width: 320, height: 320 }),
       h('h1.welcome-h', 'Find the day ', h('span.iris-text', 'everyone’s free'), '.'),
-      h('p.welcome-p', 'Your crew marks their busy days. CrewCal shows the dates that work for all of you — then helps you plan the trip, split the bill and keep the chat in one place.'),
+      h('ol.welcome-steps',
+        [['calendar', 'Mark your busy days', 'One tap per day — or import your calendar'],
+         ['sparkles', 'See when everyone’s free', 'The best dates light up for the whole crew'],
+         ['check', 'Make it happen', 'Plan it, RSVP, split the bill, chat']].map(([ic, t, d], i) =>
+          h('li.wstep', { style: { animationDelay: (120 + i * 110) + 'ms' } },
+            h('span.wstep-n', i + 1), h('span.wstep-ic', icon(ic, 18)),
+            h('span.wstep-txt', h('b', t), h('span', d))))),
       grid,
       h('div.welcome-cta',
         h('button.btn.iris.lg.block', { onclick: () => { auth.mode = 'signup'; S.screen = 'auth'; render(); } }, 'Get started — it’s free'),
         h('button.btn.ghost.lg.block', { onclick: () => { auth.mode = 'signin'; S.screen = 'auth'; render(); } }, 'I already have an account'),
         h('a.demo-link', { href: '?demo=1' }, icon('sparkles', 15, 'iris'), 'Try the demo crew — no sign-up')),
-      h('ul.welcome-feats',
-        h('li', icon('calendar', 18), h('span', h('b', 'Shared availability'), ' — one tap per busy day')),
-        h('li', icon('sparkles', 18), h('span', h('b', 'AI discovery'), ' — events and trips your crew can actually make')),
-        h('li', icon('wallet', 18), h('span', h('b', 'Split costs'), ' — who owes whom, settled in two taps'))),
       S.pendingInvite ? h('div.invite-note', icon('link', 16), 'You’ve been invited to a crew — sign in to join.') : null));
 }
 
