@@ -37,11 +37,12 @@ function buildPrompt(r: Req): { prompt: string; search: boolean; temperature: nu
     const q = clip(r.query, 200);
     const cats = (Array.isArray(r.categories) ? r.categories : []).map((c) => clip(c, 30)).filter(Boolean);
     const near = clip(r.near, 80);
-    const what = q ? `events matching "${q}"` : `notable events${cats.length ? " in these categories: " + cats.join(", ") : ""}`;
+    const what = q ? `events matching the request "${q}"` : `notable events${cats.length ? " in these categories: " + cats.join(", ") : ""}`;
+    const strict = q ? `Every result MUST match the request "${q}" itself. If it names a specific sport, series, team, artist or kind of event (for example "F1" means Formula 1 Grands Prix only), return only those events, even if that leaves just 2-5 results. Never pad the list with unrelated events.\n` : "";
     return {
       search: true, temperature: 0.2, tokens: 4000,
       prompt:
-        `Find 12-18 real ${what} happening in ${when}${near ? `, preferably in or near ${near}` : " in Europe or worldwide"}.\n` +
+        `Find up to 15 real ${what} happening in ${when}${near ? `, in or near ${near}` : " in Europe or worldwide"}.\n` + strict +
         `Only include events that really exist with confirmed or highly likely dates, and that have not already happened (today is ${new Date().toISOString().slice(0, 10)}). A group of friends will use this to plan a trip together.\n\n` +
         `Return ONLY a JSON array, no prose. Each item:\n` +
         `{"title":"Official event name","category":"Music|Motorsport|Sport|Festival|Culture|Food|Nightlife|Outdoors|Other",` +

@@ -228,6 +228,11 @@ export function aiError(e) {
 }
 
 // ── Discover (AI) ────────────────────────────────────────────
+function looksLikeRequest(t) {
+  t = (t || '').trim();
+  return t.split(/\s+/).length > 3 || /\d|event|race|concert|festival|match|gig|show|grand prix|\bf1\b/i.test(t);
+}
+
 function discover() {
   const P = S.plans;
   if (!P.months.length) { const m = today().getMonth(); P.months = [m, (m + 1) % 12, (m + 2) % 12]; }
@@ -243,7 +248,7 @@ function discover() {
     box.append(h('div.filter-row', h('span.flabel', 'When'), h('div.chips', Array.from({ length: 12 }, (_, i) => (mNow + i) % 12).map(m =>
       chip(MON[m] + (m < mNow ? ' ’' + String(yNow + 1).slice(2) : ''), P.months.includes(m), () => { P.months = P.months.includes(m) ? P.months.filter(x => x !== m) : [...P.months, m]; render(); })))));
     box.append(h('div.filter-row', h('span.flabel', 'Into'), h('div.chips', DISCOVER_CATS.map(c => chip(catEmoji(c) + ' ' + c, P.cats.includes(c), () => { P.cats = P.cats.includes(c) ? P.cats.filter(x => x !== c) : [...P.cats, c]; render(); })))));
-    box.append(h('div.filter-row', h('span.flabel', 'Near'), h('input.near-in', { id: 'q-near', placeholder: 'Anywhere (or a city / country)', value: P.near, oninput: e => (P.near = e.target.value) })));
+    box.append(h('div.filter-row', h('span.flabel', 'Where'), h('input.near-in', { id: 'q-near', placeholder: 'Optional — a city or country, e.g. Europe, Berlin', value: P.near, oninput: e => (P.near = e.target.value) })));
   }
 
   if (P.loading) box.append(h('div.skel-list', Array.from({ length: 4 }, () => h('div.skel'))));
@@ -257,6 +262,8 @@ function discover() {
   async function run() {
     if (P.loading) return;
     if (P.mode === 'places' && !P.query.trim()) return toast('Say what you’re looking for', 'err');
+    // A whole request typed into "Where" (e.g. "f1 events in spring 2027 in europe") is really the search.
+    if (P.mode === 'events' && !P.query.trim() && looksLikeRequest(P.near)) { P.query = P.near.trim(); P.near = ''; }
     P.loading = true; P.error = ''; P.searched = true; render();
     try {
       const mNow = today().getMonth(), yNow = today().getFullYear();
