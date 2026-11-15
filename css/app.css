@@ -414,6 +414,8 @@ button.linkish.center { display: flex; margin-left: auto; margin-right: auto; }
 .cell.past { opacity: .42; }
 .cell.past.out { opacity: .2; }
 .cell.most { background: color-mix(in srgb, var(--accent) 12%, var(--surface2)); }
+.cell.flash { animation: cellflash .35s cubic-bezier(.2,.9,.3,1.4); }
+@keyframes cellflash { 40% { transform: scale(.9); } }
 .cell.all { background: linear-gradient(var(--surface2), var(--surface2)) padding-box, var(--iris) border-box; box-shadow: 0 0 18px -6px rgba(165,143,255,.6); }
 .cell.all::before { content: ''; position: absolute; inset: 0; background: var(--iris-soft); pointer-events: none; }
 .cell.mine { background: repeating-linear-gradient(135deg, var(--no-bg) 0 5px, transparent 5px 10px), var(--surface2); border-color: color-mix(in srgb, var(--no) 40%, transparent); box-shadow: none; }

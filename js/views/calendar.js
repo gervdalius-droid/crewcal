@@ -1,5 +1,5 @@
 import { h, icon, MONTHS, DOW, iso, parseDay, today, addDays, dow, fmtDay, fmtRange, avatar, avatarStack, isWeekend } from '../util.js';
-import { S, render, active, bmap, me, iAmBusy, toggleBusy, person, addNote, deleteNote, attempt, isAdmin } from '../store.js';
+import { S, render, active, bmap, me, iAmBusy, toggleBusy, person, addNote, deleteNote, attempt, isAdmin, toast } from '../store.js';
 import { dayStatus, bestDays, freeWindows } from '../logic.js';
 import { openSheet, chip, segmented } from '../ui.js';
 import { openEventSheet, openEventForm, eventCard } from './plans.js';
@@ -71,12 +71,15 @@ function monthGrid(y, m, people) {
     const notes = S.crew.notes.filter(n => n.day === day);
     const all = people.length > 1 && st.free.length === people.length;
     const most = !all && people.length > 1 && st.ratio >= 0.7;
-    const cls = ['cell', out && 'out', past && 'past', day === t && 'today', mine && 'mine', all && !past && 'all', most && !past && 'most', isWeekend(d) && 'we'].filter(Boolean).join('.');
+    const cls = ['cell', out && 'out', past && 'past', day === t && 'today', mine && 'mine', all && !past && 'all', most && !past && 'most', isWeekend(d) && 'we', S.cal.flash === day && 'flash'].filter(Boolean).join('.');
     const cell = h('button.' + cls, {
       role: 'gridcell', 'data-day': day,
       'aria-label': fmtDay(day, { relative: false }) + ' — ' + st.free.length + ' of ' + people.length + ' free' + (mine ? ', you are busy' : '') + (evs.length ? ', ' + evs.length + ' plan' : ''),
       onclick: () => {
-        if (S.cal.mark) { if (!past) toggleBusy(day); }
+        if (S.cal.mark) {
+          if (past) toast('That day has already passed — tap today or later');
+          else { S.cal.flash = day; setTimeout(() => { if (S.cal.flash === day) S.cal.flash = null; }, 400); toggleBusy(day); }
+        }
         else openDaySheet(day);
       },
     },
