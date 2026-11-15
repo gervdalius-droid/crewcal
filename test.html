@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CrewCal tests</title>
+<style>
+  body { font: 14px/1.5 system-ui, sans-serif; background: #0b0b10; color: #eee; padding: 24px; }
+  .ok { color: #5be3a4; } .fail { color: #ff6b8a; font-weight: 600; }
+  h1 { font-size: 18px; } h2 { font-size: 14px; margin: 18px 0 4px; color: #a99bff; }
+  pre { white-space: pre-wrap; margin: 0 0 0 18px; color: #ffb4c4; }
+</style>
+</head>
+<body>
+<h1 id="sum">Running…</h1>
+<div id="out"></div>
+<script type="module">
+import { iso, addDays, today, parseDay, money, parseJsonArray, fmtRange } from './js/util.js';
+import { busyMap, dayStatus, bestDays, freeWindows, eventFit, balances, settleUp, icsBusyDays, eventsToIcs, tripBudget, bookingLinks } from './js/logic.js';
+import { DemoApi } from './js/demo.js';
+
+const out = document.getElementById('out');
+let pass = 0, fail = 0, section = '';
+const log = (cls, msg, detail) => { const d = document.createElement('div'); d.className = cls; d.textContent = (cls === 'ok' ? '✓ ' : '✗ ') + msg; out.append(d); if (detail) { const p = document.createElement('pre'); p.textContent = detail; out.append(p); } };
+function eq(a, b, msg) { const A = JSON.stringify(a), B = JSON.stringify(b); if (A === B) { pass++; log('ok', msg); } else { fail++; log('fail', section + ' › ' + msg, 'expected ' + B + '\n     got ' + A); } }
+function ok(c, msg) { eq(!!c, true, msg); }
+async function throws(fn, re, msg) { try { await fn(); fail++; log('fail', section + ' › ' + msg, 'did not throw'); } catch (e) { re.test(e.message) ? (pass++, log('ok', msg)) : (fail++, log('fail', section + ' › ' + msg, 'threw: ' + e.message)); } }
+const H = t => { section = t; const e = document.createElement('h2'); e.textContent = t; out.append(e); };
+
+try {
+  // ── Availability ──
+  H('Availability');
+  const T = parseDay('2026-03-02'); // a Monday
+  const P = ['a', 'b', 'c'].map(id => ({ user_id: id, name: id.toUpperCase() }));
+  const D = n => iso(addDays(T, n));
+  const busy = [{ user_id: 'a', day: D(0) }, { user_id: 'b', day: D(0) }, { user_id: 'c', day: D(1) }, { user_id: 'a', day: D(5) }];
+  const bm = busyMap(busy);
+  eq(dayStatus(D(0), P, bm).free.map(p => p.user_id), ['c'], 'dayStatus lists who is free');
+  eq(dayStatus(D(2), P, bm).ratio, 1, 'nobody busy → ratio 1');
+  const best = bestDays(P, bm, { from: T, horizon: 7, limit: 3 });
+  eq(best[0].day, D(6), 'best day prefers a fully-free weekend day (Sunday)');
+  ok(best.every(b => b.free.length === 3), 'top 3 are all fully free');
+  eq(bestDays(P, bm, { from: T, horizon: 7, weekendsOnly: true }).map(b => b.day), [D(6), D(5)], 'weekendsOnly keeps Sat/Sun, ranked by free count');
+  eq(freeWindows(P, bm, { from: T, horizon: 7, minLen: 2 }), [{ from: D(2), to: D(4), days: 3 }], 'freeWindows finds the 3-day all-free run');
+  eq(freeWindows(P, bm, { from: T, horizon: 7, min: 2, minLen: 2 })[0], { from: D(1), to: D(6), days: 6 }, 'freeWindows with min=2 tolerates one busy person');
+  const fit = eventFit({ starts_on: D(0), ends_on: D(1) }, P, bm);
+  eq([fit.free.length, fit.busy.length], [0, 3], 'eventFit: anyone busy on any day of the range is busy');
+
+  // ── Money ──
+  H('Money');
+  const ex = [
+    { amount: 90, currency: 'EUR', paid_by: 'a', split_with: ['a', 'b', 'c'] },
+    { amount: 10, currency: 'EUR', paid_by: 'b', split_with: ['a', 'b'] },
+    { amount: 10, currency: 'EUR', paid_by: 'c', split_with: ['a', 'b', 'c'] }, // 3.33 shares
+  ];
+  const bal = balances(ex, []);
+  eq(bal.EUR, { a: 51.67, b: -28.33, c: -23.34 }, 'balances net per person (rounding absorbed by last share)');
+  eq(Math.round((bal.EUR.a + bal.EUR.b + bal.EUR.c) * 100), 0, 'balances sum to zero');
+  const plan = settleUp(bal.EUR);
+  eq(plan, [{ from: 'b', to: 'a', amount: 28.33 }, { from: 'c', to: 'a', amount: 23.34 }], 'settleUp: two transfers clear it');
+  const after = balances(ex, plan.map(p => ({ from_user: p.from, to_user: p.to, amount: p.amount, currency: 'EUR' })));
+  ok(Object.values(after.EUR).every(v => Math.abs(v) < 0.01), 'recording the suggested payments settles everyone');
+  eq(Object.keys(balances([{ amount: 5, currency: 'GBP', paid_by: 'a', split_with: ['b'] }, ...ex], [])).sort(), ['EUR', 'GBP'], 'currencies are kept apart');
+  eq([money(12), money(12.5), money(-3.456, 'USD'), money(7, 'CHF')], ['€12', '€12.50', '$-3.46', '7 CHF'], 'money formatting');
+
+  // ── Calendar files ──
+  H('.ics import / export');
+  const ics = ['BEGIN:VCALENDAR',
+    'BEGIN:VEVENT', 'DTSTART;VALUE=DATE:20260310', 'DTEND;VALUE=DATE:20260312', 'SUMMARY:Trip', 'END:VEVENT',
+    'BEGIN:VEVENT', 'DTSTART:20260315T090000Z', 'DTEND:20260315T100000Z', 'SUMMARY:Meeting', 'END:VEVENT',
+    'BEGIN:VEVENT', 'DTSTART;VALUE=DATE:20260316', 'TRANSP:TRANSPARENT', 'SUMMARY:Free-time thing', 'END:VEVENT',
+    'BEGIN:VEVENT', 'DTSTART;VALUE=DATE:20260317', 'STATUS:CANCELLED', 'END:VEVENT',
+    'BEGIN:VEVENT', 'DTSTART;VALUE=DATE:20260318', 'DTEND;VALUE=DATE:20260319', 'RRULE:FREQ=WEEKLY;COUNT=3', 'SUMMARY:Gym', 'END:VEVENT',
+    'BEGIN:VEVENT', 'DTSTART;TZID=Europe/Vilnius:20260325T190000', 'DTEND;TZID=Europe/Vilnius:20260325T210000', 'SUMMARY:Long', ' folded line', 'END:VEVENT',
+    'END:VCALENDAR'].join('\r\n');
+  eq(icsBusyDays(ics, { from: '2026-03-01', to: '2026-04-30' }), ['2026-03-10', '2026-03-11', '2026-03-15', '2026-03-18', '2026-03-25', '2026-04-01'],
+    'all-day DTEND exclusive, UTC times, skips TRANSPARENT/CANCELLED, weekly RRULE COUNT, TZID times');
+  eq(icsBusyDays(ics, { from: '2026-03-12', to: '2026-03-20' }), ['2026-03-15', '2026-03-18'], 'clips to the requested range');
+  const wk = icsBusyDays('BEGIN:VEVENT\nDTSTART;VALUE=DATE:20260302\nRRULE:FREQ=WEEKLY;BYDAY=MO,WE;UNTIL=20260311\nEND:VEVENT', { from: '2026-03-01', to: '2026-03-31' });
+  eq(wk, ['2026-03-02', '2026-03-04', '2026-03-09', '2026-03-11'], 'weekly BYDAY with UNTIL');
+  const outIcs = eventsToIcs([{ id: 'x1', title: 'Dinner, at Maya’s; 8pm', starts_on: '2026-03-10', ends_on: '2026-03-11', location: 'Vilnius', note: 'Bring wine', url: '' }]);
+  ok(outIcs.includes('DTSTART;VALUE=DATE:20260310') && outIcs.includes('DTEND;VALUE=DATE:20260312'), 'export: all-day end is exclusive');
+  ok(outIcs.includes('SUMMARY:Dinner\\, at Maya’s\\; 8pm'), 'export escapes commas and semicolons');
+  eq(icsBusyDays(outIcs, { from: '2026-03-01', to: '2026-03-31' }), ['2026-03-10', '2026-03-11'], 'export → import round-trips');
+  ok(eventsToIcs([{ id: 't', title: 'Drinks', starts_on: '2026-03-10', ends_on: '2026-03-10', start_time: '19:30:00', end_time: '22:00' }]).includes('DTSTART:20260310T193000'), 'timed event exports local times');
+
+  // ── Helpers ──
+  H('Parsing & trip');
+  eq(parseJsonArray('Sure!\n```json\n[{"a":1},{"a":2}]\n```'), [{ a: 1 }, { a: 2 }], 'parseJsonArray strips fences/prose');
+  eq(parseJsonArray('[{"a":1},{"a":2},{"a":'), [{ a: 1 }, { a: 2 }], 'parseJsonArray salvages a truncated tail');
+  eq(parseJsonArray('no json here'), null, 'parseJsonArray returns null on garbage');
+  const b1 = tripBudget('Prague, Czechia', 2, 4, 50), b2 = tripBudget('London, UK', 2, 4, 50);
+  ok(b1.total < b2.total && b1.tier === 1 && b2.tier === 3, 'tripBudget: cheaper city costs less');
+  eq(b1.total, b1.travel + b1.stay + b1.food + b1.fun + b1.ticket, 'tripBudget parts add up');
+  const links = bookingLinks({ location: 'Riga, Latvia', starts_on: '2026-12-11', ends_on: '2026-12-11', guests: 3 });
+  ok(links.find(l => l.key === 'stay').url.includes('checkout=2026-12-12'), 'one-day trip still books a night');
+  eq(fmtRange('2026-03-10', '2026-03-12'), '10–12 Mar', 'fmtRange same month');
+
+  // ── Demo backend enforces the same rules as the database ──
+  H('Permissions (demo backend mirrors RLS)');
+  const api = new DemoApi({ persist: false, delay: 0, fresh: true });
+  const groups = await api.myGroups();
+  eq(groups.map(g => [g.name, g.role]), [['Weekend Crew', 'admin'], ['Climbing Club', 'member']], 'seeded crews + roles');
+  await throws(() => api.updateGroup('g-climb', { name: 'Hacked' }), /admin/i, 'non-admin cannot rename a crew');
+  await throws(() => api.setMember('g-climb', 'u-tom', { role: 'admin' }), /admin/i, 'non-admin cannot promote');
+  await throws(() => api.rotateInvite('g-climb'), /admin/i, 'non-admin cannot rotate invite');
+  await throws(() => api.deleteEvent('e5'), /creator or an admin/i, 'cannot delete someone else’s plan as non-admin');
+  await throws(() => api.events('g-nope'), /not a member/i, 'cannot read a crew you are not in');
+  await throws(() => api.joinGroup('NOPE00'), /no crew/i, 'bad invite code is rejected');
+  const g = await api.createGroup('Test crew', '🎲');
+  const priv = await api.joinGroup(g.invite_code);
+  eq(priv.status, 'active', 'joining your own crew again is harmless');
+  const mem = await api.members('g-weekend');
+  eq(mem.filter(m => m.status === 'pending').map(m => m.name), ['Rokas Vaitkus'], 'admin sees pending requests');
+  await api.setMember('g-weekend', 'u-rokas', { status: 'active' });
+  eq((await api.members('g-weekend')).find(m => m.user_id === 'u-rokas').status, 'active', 'admin approves a request');
+  await throws(() => api.saveEvent({ group_id: 'g-weekend', title: 'x', starts_on: '2026-03-10', ends_on: '2026-03-09' }), /before the start/, 'event end before start is rejected');
+  await throws(() => api.addExpense({ group_id: 'g-weekend', title: 'x', amount: 0, paid_by: 'u-me', split_with: ['u-me'] }), /more than zero/, 'zero expense rejected');
+
+  H('Flows');
+  const t0 = iso(today());
+  await api.setBusy(t0, true);
+  ok((await api.busy(['u-me'], t0, t0)).length === 1, 'mark busy');
+  await api.setBusy(t0, false);
+  ok((await api.busy(['u-me'], t0, t0)).length === 0, 'unmark busy');
+  await api.addBusyDays([D(0), D(1)], 'import');
+  await api.clearImported();
+  eq((await api.busy(['u-me'], D(0), D(1))).length, 0, 'imported days can be cleared without touching manual ones');
+  const ev = await api.saveEvent({ group_id: 'g-weekend', title: 'Bowling', starts_on: t0, ends_on: t0 });
+  await api.setRsvp(ev.id, 'going');
+  eq((await api.rsvps([ev.id])).map(r => r.status), ['going'], 'RSVP saved');
+  await api.setRsvp(ev.id, null);
+  eq((await api.rsvps([ev.id])).length, 0, 'RSVP cleared');
+  const m = await api.sendMessage('g-weekend', 'hello');
+  ok((await api.messages('g-weekend')).some(x => x.id === m.id), 'chat message stored');
+  const r = await api.ai('events', { group_id: 'g-weekend', months: ['2027-02'] });
+  ok(parseJsonArray(r.text).every(x => x.starts_on.startsWith('2027-02')), 'demo AI returns events in the requested year-month');
+  api.db.usage = 25;
+  try { await api.ai('events', { group_id: 'g-weekend' }); fail++; log('fail', 'quota not enforced'); } catch (e) { eq(e.message, 'quota', 'AI quota enforced'); }
+  await api.removeMember('g-weekend', 'u-me');
+  await throws(() => api.events('g-weekend'), /not a member/i, 'after leaving, crew data is no longer readable');
+} catch (e) { fail++; log('fail', 'Crashed: ' + e.message, e.stack); }
+
+const sum = document.getElementById('sum');
+sum.textContent = (fail ? '✗ ' : '✓ ') + pass + ' passed, ' + fail + ' failed';
+sum.className = fail ? 'fail' : 'ok';
+document.body.dataset.done = '1'; document.body.dataset.fail = String(fail); document.body.dataset.pass = String(pass);
+</script>
+</body>
+</html>

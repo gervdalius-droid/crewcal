@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CrewCal — Terms & Privacy</title>
+<link rel="icon" href="img/icon-192.png">
+<style>
+  :root { --bg: #07070b; --text: #ececf2; --muted: #9a9aab; --line: rgba(255,255,255,.1); --accent: #a99bff; color-scheme: dark; }
+  @media (prefers-color-scheme: light) { :root { --bg: #f6f5f9; --text: #15141d; --muted: #5d5c6e; --line: rgba(0,0,0,.1); --accent: #5847d6; color-scheme: light; } }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 Inter, system-ui, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 30px; margin: 8px 0 4px; } h2 { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); } h3 { margin-top: 24px; }
+  a { color: var(--accent); } .muted { color: var(--muted); } li { margin: 4px 0; }
+  .note { border: 1px dashed var(--line); padding: 12px 14px; border-radius: 12px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body><main>
+<a href="./">← Back to CrewCal</a>
+<h1>Terms & Privacy</h1>
+<p class="muted">Last updated: 15 November 2026</p>
+<p class="note">Plain-language draft written for launch. Have it checked against your company details and local law before charging money.</p>
+
+<h2 id="privacy">Privacy Policy</h2>
+<p>CrewCal helps groups of friends find days when everyone is free. We collect as little as we can to do that.</p>
+<h3>What we store</h3>
+<ul>
+  <li><b>Account:</b> your email address and a password hash (handled by our auth provider, Supabase).</li>
+  <li><b>Profile:</b> the display name and colour you choose.</li>
+  <li><b>Crew content:</b> the days you mark as busy, plans, RSVPs, notes, chat messages and expenses you add.</li>
+  <li><b>Calendar imports:</b> when you import an .ics file we keep <i>only the dates</i> you are busy — never event titles, places or attendees. The file is read on your device and not uploaded.</li>
+  <li><b>AI usage:</b> a monthly count of AI requests, to apply the free limit.</li>
+</ul>
+<h3>Who can see it</h3>
+<p>Your busy days and profile are visible only to people in crews you belong to. Plans, chat, notes and expenses are visible only to members of that crew. This is enforced on the server, not just in the app.</p>
+<h3>AI features</h3>
+<p>When you use Discover, trip tips or the crew brief, the search text and the minimum context needed (for example a city and dates) are sent to Google’s Gemini API to generate the answer. We do not send names, emails or chat messages.</p>
+<h3>Where it’s stored</h3>
+<p>Data is stored with Supabase (EU region where available). We don’t sell data, show ads or use tracking cookies. Booking links (flights, hotels, etc.) open the partner’s site, which has its own privacy policy; some links may earn us a commission at no cost to you.</p>
+<h3>Your rights</h3>
+<p>You can edit your profile and delete your content in the app at any time. To export or permanently delete your account and all your data, email <a href="mailto:hello@crewcal.app">hello@crewcal.app</a> and we’ll do it within 30 days. If you’re in the EU/EEA you have the rights of access, rectification, erasure, portability and objection under the GDPR, and can complain to your data protection authority.</p>
+
+<h2 id="terms">Terms of Use</h2>
+<ul>
+  <li>You must be at least 16 to use CrewCal.</li>
+  <li>Keep your account secure and don’t share your password. Invite links give access to a crew — share them only with people you want in it. Admins can reset the link at any time.</li>
+  <li>Don’t use CrewCal to harass people, send spam or post illegal content. We may remove content or accounts that do.</li>
+  <li>AI results (events, places, prices, travel tips) can be wrong or out of date. Always check the official source before you book or pay.</li>
+  <li>Expense balances are a convenience — CrewCal does not move money and isn’t responsible for payments between friends.</li>
+  <li>CrewCal is provided “as is”. We work hard to keep it running but can’t guarantee it will always be available or error-free.</li>
+  <li>Paid plans, when offered, renew until cancelled and can be cancelled any time; you keep access until the end of the paid period.</li>
+  <li>We may update these terms; if the change is significant we’ll tell you in the app.</li>
+</ul>
+<p>Questions: <a href="mailto:hello@crewcal.app">hello@crewcal.app</a></p>
+</main></body>
+</html>
