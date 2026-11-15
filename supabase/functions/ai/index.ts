@@ -148,7 +148,9 @@ Deno.serve(async (req) => {
     await admin.from("ai_usage").upsert({ user_id: user.id, month, count: used + 1 });
     return json({ text, used: used + 1, limit: Number.isFinite(limit) ? limit : null });
   } catch (e) {
-    const status = (e as any).status === 429 ? 429 : 502;
-    return json({ error: status === 429 ? "AI is busy right now — try again in a minute" : (e as Error).message }, status);
+    // Never show provider/billing details to users; keep them in the function logs.
+    console.error("gemini:", (e as any).status, (e as Error).message);
+    const status = (e as any).status === 429 ? 429 : 503;
+    return json({ error: status === 429 ? "AI is busy right now — try again in a minute" : "AI is unavailable right now — please try again later" }, status);
   }
 });
