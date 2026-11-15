@@ -75,6 +75,24 @@ function buildPrompt(r: Req): { prompt: string; search: boolean; temperature: nu
         `which area to stay in, and how to get around. Plain text, no markdown, no lists.`,
     };
   }
+  if (r.kind === "tripplan") {
+    const title = clip(r.title, 120), location = clip(r.location, 100);
+    const from = clip(r.starts_on, 10), to = clip(r.ends_on, 10), origin = clip(r.origin, 80);
+    const guests = Math.max(1, Math.min(30, Number(r.guests) || 2));
+    return {
+      search: false, temperature: 0.4, tokens: 1400,
+      prompt:
+        `A group of ${guests} friends${origin ? ` travelling from ${origin}` : ""} is going to "${title}" in ${location}, ${from} to ${to}. Plan the trip.\n` +
+        `Return ONLY a JSON object, no prose:\n` +
+        `{"travel":[{"mode":"flight|train|bus|car|ferry","summary":"one sentence: route and why","duration":"e.g. ~2h 30m","price_from":number|null,"best":true|false}],` +
+        `"stays":[{"area":"neighbourhood or district name","type":"Hotel|Apartment|Hostel","why":"one sentence for a group this size","price_night":number|null}],` +
+        `"todo":[{"name":"specific activity or sight","why":"a few words"}],` +
+        `"tips":"2-3 sentences: weather and vibe at that time, one tip specific to this event, how to get around"}\n` +
+        `travel: the 2-3 realistic ways to get there${origin ? "" : " (origin unknown: give general options)"}, exactly one with best=true; price_from is a typical return price per person in EUR. ` +
+        `stays: 3 different real areas, mixing types to suit the group (an apartment is often best for 4+); price_night is a typical price per room or flat per night in EUR for those dates. ` +
+        `todo: 4-5 things worth booking. Use null when you are not reasonably sure of a price.`,
+    };
+  }
   if (r.kind === "brief") {
     // Client sends already-computed facts (free windows, ideas); the model only writes them up.
     const facts = clip(JSON.stringify(r.facts ?? {}), 4000);

@@ -153,6 +153,13 @@ export const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // Pull the first JSON array out of model output (tolerates ``` fences and a truncated tail).
+export function parseJsonObject(text) {
+  if (!text) return null;
+  const c = String(text).replace(/```(?:json)?/gi, '').trim();
+  const s = c.indexOf('{'), e = c.lastIndexOf('}');
+  if (s >= 0 && e > s) { try { const o = JSON.parse(c.slice(s, e + 1)); return o && typeof o === 'object' && !Array.isArray(o) ? o : null; } catch {} }
+  return null;
+}
 export function parseJsonArray(text) {
   if (!text) return null;
   const c = String(text).replace(/```(?:json)?/gi, '').trim();

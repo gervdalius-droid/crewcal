@@ -44,3 +44,10 @@ Use HTTPS (the service worker only registers on https).
 ## Later: Pro billing
 The upgrade sheet collects a waitlist (`waitlist` table). When ready: Stripe Checkout + a webhook edge
 function that sets `profiles.plan = 'pro'` with the service role. The client never writes `plan`.
+
+## Earning from the trip planner (affiliate links)
+Every booking button in "Plan the trip" goes through `withAffiliate()` (`js/logic.js`). Paste your IDs into `AFFILIATE` in `js/config.js`:
+- `stay` — Booking.com, `flights` — Skyscanner, `trains` — Omio, `car` — Rentalcars, `todo` — GetYourGuide.
+- Either a query parameter (`aid=1234567`) or a deep-link wrapper containing `{url}` (what networks like Travelpayouts generate).
+Until an ID is set the link still works, it just earns nothing. The disclosure line under the links is already in the app and in `legal.html`.
+The AI plan needs the `tripplan` request type in `supabase/functions/ai` to be deployed.

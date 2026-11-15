@@ -325,6 +325,22 @@ function demoAi(kind, p) {
     return JSON.stringify(names.map((n, i) => ({ name: n[0], type: n[1], city, address: (10 + i * 7) + ' Main Street, ' + city, blurb: n[3], price: n[2], hours: i % 2 ? '17:00–02:00' : '12:00–23:00', rating: 4.2 + (i % 4) / 10 })));
   }
   if (kind === 'trip') return `${p.location || 'The city'} in ${MONTHS[parseDay(p.starts_on).getMonth()]} is lively and busy around ${p.title} — book your stay early, prices climb in the last two weeks. Stay central so you can walk to the venue and to the bars after. Public transport is easy and cheap; grab a day pass on arrival. Pack layers: evenings get cold. (Demo answer — the real one is written by AI for your exact trip.)`;
+  if (kind === 'tripplan') {
+    const city = String(p.location || 'the city').split(',')[0];
+    return JSON.stringify({
+      travel: [
+        { mode: 'flight', summary: `Direct or one-stop flights${p.origin ? ' from ' + p.origin : ''} to ${city}; book 6–8 weeks ahead.`, duration: '~2h 30m', price_from: 120, best: true },
+        { mode: 'train', summary: 'Slower but scenic, and you arrive in the centre.', duration: '~9h', price_from: 70, best: false },
+      ],
+      stays: [
+        { area: 'Old Town', type: 'Hotel', why: 'Walk to everything; best for a first visit.', price_night: 130 },
+        { area: 'Near the venue', type: 'Apartment', why: 'One big flat for the whole crew, no taxis after.', price_night: 180 },
+        { area: 'Station district', type: 'Hostel', why: 'Cheapest beds and easy airport link.', price_night: 60 },
+      ],
+      todo: [{ name: 'Food market tour', why: 'Easy first evening' }, { name: 'Rooftop bars', why: 'Sunset drinks' }, { name: 'Day trip by boat', why: 'If you stay an extra day' }],
+      tips: `${city} gets busy around ${p.title} — book stays early, prices climb in the last two weeks. (Demo plan — the real one is written by AI for your exact trip.)`,
+    });
+  }
   if (kind === 'brief') {
     const f = p.facts || {};
     const w = f.windows?.[0];

@@ -16,7 +16,7 @@ STEPS = [
   ("mark-mode",     "closeSheets(); go('calendar')", ("button", "Mark my busy days")),
   ("event-sheet",   "closeSheets(); S.cal.mark=false; go('plans')", (".ev-card", "Cabin weekend")),
   ("trip-sheet",    None, (".action", "Plan the trip")),
-  ("trip-ai",       None, ("button", "Get local tips")),
+  ("trip-ai",       None, ("button", "Plan it for us")),
   ("event-form",    "closeSheets(); go('plans')", (".view-head .btn", "")),
   ("ideas",         "closeSheets(); S.plans.seg='ideas'; go('plans'); render()", None),
   ("discover",      "S.plans.seg='discover'; render()", None),

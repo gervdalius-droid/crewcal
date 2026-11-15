@@ -1,6 +1,7 @@
-import { h, icon, fmtDay, fmtRange, parseDay, iso, today, addDays, MON, MONTHS, avatar, avatarStack, daysBetween, money, parseJsonArray } from '../util.js';
+import { h, icon, fmtDay, fmtRange, parseDay, iso, today, addDays, MON, MONTHS, avatar, avatarStack, daysBetween, money, parseJsonArray, parseJsonObject } from '../util.js';
 import { S, render, active, bmap, me, person, rsvpsFor, myRsvp, setRsvp, saveEvent, deleteEvent, attempt, isAdmin, ai, group, toast, friendly } from '../store.js';
-import { eventFit, freeWindows, bestDays, tripBudget, bookingLinks, eventsToIcs } from '../logic.js';
+import { eventFit, freeWindows, bestDays, tripBudget, bookingLinks, stayLink, todoLink, MODE_PARTNER, eventsToIcs } from '../logic.js';
+import { AFFILIATE } from '../config.js';
 import { openSheet, confirmSheet, field, input, select, segmented, chip, empty, spinner, share, download } from '../ui.js';
 import { openUpgrade } from './crew.js';
 import { openExpenseForm } from './money.js';
@@ -337,7 +338,7 @@ function placeCard(p) {
 // ── Trip planner ─────────────────────────────────────────────
 export function openTripSheet(ev) {
   const going = ev.id ? rsvpsFor(ev.id).filter(r => r.status === 'going').length : 0;
-  const t = { origin: localStorage.getItem('whossup-origin') || '', guests: Math.max(2, going || active().length || 2), summary: null, loading: false, error: '' };
+  const t = { origin: localStorage.getItem('whossup-origin') || '', guests: Math.max(2, going || active().length || 2), plan: null, loading: false, error: '' };
   const nights = Math.max(1, daysBetween(ev.starts_on, ev.ends_on) || 1);
   openSheet({ title: 'Plan the trip', wide: true }, (body, sheet) => {
     const b = tripBudget(ev.location, nights, t.guests, ev.price_min ? +ev.price_min : 0);
@@ -351,19 +352,60 @@ export function openTripSheet(ev) {
         h('div.brow', icon(ic, 16), h('span', k), h('span.grow'), h('b', money(v))))),
       h('p.muted.tiny', 'Estimate from typical prices for the destination. Check the links for real prices.')));
 
-    body.append(h('div.links-grid', bookingLinks({ location: ev.location, starts_on: ev.starts_on, ends_on: ev.ends_on, guests: t.guests, origin: t.origin }).map(l =>
-      h('a.link-card', { href: l.url, target: '_blank', rel: 'noopener sponsored' }, icon(l.icon, 20), h('span.lc-t', l.label), h('span.lc-s', l.sub)))));
+    const links = bookingLinks({ location: ev.location, starts_on: ev.starts_on, ends_on: ev.ends_on, guests: t.guests, origin: t.origin }, AFFILIATE);
+    const linkFor = key => links.find(l => l.key === key);
+    const out = (url, cls, ...kids) => h('a' + cls, { href: url, target: '_blank', rel: 'noopener sponsored' }, ...kids);
 
-    const aiBox = h('div.ai-box');
-    if (t.summary) aiBox.append(h('div.ai-head', icon('sparkles', 15, 'iris'), 'Local tips'), h('p', t.summary));
-    else if (t.loading) aiBox.append(spinner('Writing your trip brief…'));
-    else aiBox.append(h('button.btn.soft.block', { onclick: async () => {
+    // AI trip plan: how to get there, where to stay, what to do — each with a booking link.
+    const plan = h('div.trip-plan');
+    if (t.plan) {
+      const p = t.plan;
+      const MODE = { flight: ['plane', 'Fly'], train: ['compass', 'Train'], bus: ['compass', 'Bus'], ferry: ['compass', 'Ferry'], car: ['car', 'Drive'] };
+      if (p.travel.length) plan.append(h('div.tp-sec', h('h4', icon('plane', 16), 'Getting there'),
+        p.travel.map(x => { const [ic, label] = MODE[x.mode] || MODE.flight; const l = linkFor(MODE_PARTNER[x.mode] || 'flights');
+          return h('div.tp-row' + (x.best ? '.tp-pick' : ''),
+            h('span.tp-ic', icon(ic, 18)),
+            h('div.tp-main', h('div.tp-t', label, x.best ? h('span.tag.ok', 'Best pick') : null), h('div.tp-s', x.summary),
+              h('div.tp-meta', x.duration ? h('span', icon('clock', 13), x.duration) : null, x.price_from ? h('span', 'from ' + money(x.price_from) + ' pp') : null)),
+            l ? out(l.url, '.btn.sm.soft', 'Check ' + l.sub) : null); })));
+      if (p.stays.length) plan.append(h('div.tp-sec', h('h4', icon('bed', 16), 'Where to stay'),
+        p.stays.map(x => h('div.tp-row',
+          h('span.tp-ic', icon('bed', 18)),
+          h('div.tp-main', h('div.tp-t', x.area, x.type ? h('span.tag', x.type) : null), h('div.tp-s', x.why),
+            h('div.tp-meta', x.price_night ? h('span', '≈ ' + money(x.price_night) + ' / night per room') : null)),
+          out(stayLink({ area: x.area, location: ev.location, starts_on: ev.starts_on, ends_on: ev.ends_on, guests: t.guests }, AFFILIATE), '.btn.sm.disco', 'See stays')))));
+      if (p.todo.length) plan.append(h('div.tp-sec', h('h4', icon('ticket', 16), 'Things to do'),
+        h('div.tp-todo', p.todo.map(x => out(todoLink({ name: x.name, location: ev.location }, AFFILIATE), '.tp-chip', h('b', x.name), x.why ? h('span', x.why) : null)))));
+      if (p.tips) plan.append(h('div.ai-box', h('div.ai-head', icon('sparkles', 15, 'iris'), 'Good to know'), h('p', p.tips)));
+    } else if (t.loading) plan.append(spinner('Planning your trip…'));
+    else plan.append(h('button.btn.disco.lg.block', { onclick: async () => {
       t.loading = true; sheet.redraw();
-      try { t.summary = await ai('trip', { title: ev.title, location: ev.location, starts_on: ev.starts_on, ends_on: ev.ends_on, origin: t.origin, guests: t.guests }); }
-      catch (e) { aiError(e); }
+      try {
+        const req = { title: ev.title, location: ev.location, starts_on: ev.starts_on, ends_on: ev.ends_on, origin: t.origin, guests: t.guests };
+        let o;
+        try { o = parseJsonObject(await ai('tripplan', req)); }
+        catch (e) {
+          // Server function not updated yet: fall back to the short text brief.
+          if (!/unknown request/i.test(e?.message || '')) throw e;
+          o = { tips: await ai('trip', req) };
+        }
+        if (!o) throw new Error('The AI answer was unclear — try again');
+        const arr = v => Array.isArray(v) ? v.filter(x => x && typeof x === 'object') : [];
+        const str = (v, n) => String(v ?? '').slice(0, n), num = v => (Number(v) > 0 ? Math.round(Number(v)) : null);
+        t.plan = {
+          travel: arr(o.travel).slice(0, 3).map(x => ({ mode: str(x.mode, 10).toLowerCase(), summary: str(x.summary, 160), duration: str(x.duration, 30), price_from: num(x.price_from), best: !!x.best })),
+          stays: arr(o.stays).slice(0, 3).map(x => ({ area: str(x.area, 60), type: str(x.type, 20), why: str(x.why, 160), price_night: num(x.price_night) })).filter(x => x.area),
+          todo: arr(o.todo).slice(0, 5).map(x => ({ name: str(x.name, 60), why: str(x.why, 100) })).filter(x => x.name),
+          tips: str(o.tips, 500),
+        };
+      } catch (e) { aiError(e); }
       t.loading = false; sheet.redraw();
-    } }, icon('sparkles', 16, 'iris'), 'Get local tips from AI'));
-    body.append(aiBox);
+    } }, icon('sparkles', 18), 'Plan it for us — travel, stays & things to do'));
+    body.append(plan);
+
+    body.append(h('div.sec-head.mt', h('h4', 'Book it')),
+      h('div.links-grid', links.map(l => out(l.url, '.link-card', icon(l.icon, 20), h('span.lc-t', l.label), h('span.lc-s', l.sub)))),
+      h('p.muted.tiny', 'Booking links open our partners’ sites. We may earn a small commission when you book — it never costs you extra.'));
     if (!ev.id) body.append(h('button.btn.primary.block.mt', { onclick: async () => { const row = await attempt(() => saveEvent({ ...ev, status: 'idea' }), 'Saved to Ideas'); if (row) sheet.close(); } }, icon('star', 16), 'Save as idea for the crew'));
   });
 }

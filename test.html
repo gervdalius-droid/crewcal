@@ -15,7 +15,7 @@
 <div id="out"></div>
 <script type="module">
 import { iso, addDays, today, parseDay, money, parseJsonArray, fmtRange } from './js/util.js';
-import { busyMap, dayStatus, bestDays, freeWindows, eventFit, balances, settleUp, icsBusyDays, eventsToIcs, tripBudget, bookingLinks } from './js/logic.js';
+import { busyMap, dayStatus, bestDays, freeWindows, eventFit, balances, settleUp, icsBusyDays, eventsToIcs, tripBudget, bookingLinks, withAffiliate, stayLink } from './js/logic.js';
 import { DemoApi } from './js/demo.js';
 
 const out = document.getElementById('out');
@@ -93,6 +93,12 @@ try {
   eq(b1.total, b1.travel + b1.stay + b1.food + b1.fun + b1.ticket, 'tripBudget parts add up');
   const links = bookingLinks({ location: 'Riga, Latvia', starts_on: '2026-12-11', ends_on: '2026-12-11', guests: 3 });
   ok(links.find(l => l.key === 'stay').url.includes('checkout=2026-12-12'), 'one-day trip still books a night');
+  eq(withAffiliate('https://a.com/x?q=1', ''), 'https://a.com/x?q=1', 'withAffiliate: no id leaves the link alone');
+  eq(withAffiliate('https://a.com/x?q=1', 'aid=42'), 'https://a.com/x?q=1&aid=42', 'withAffiliate: appends a parameter');
+  eq(withAffiliate('https://a.com/x', '?aid=42'), 'https://a.com/x?aid=42', 'withAffiliate: starts the query when needed');
+  eq(withAffiliate('https://a.com/x?q=1', 'https://tp.media/r?m=1&u={url}'), 'https://tp.media/r?m=1&u=https%3A%2F%2Fa.com%2Fx%3Fq%3D1', 'withAffiliate: deep-link wrapper');
+  ok(bookingLinks({ location: 'Riga, Latvia', starts_on: '2026-12-11', ends_on: '2026-12-13' }, { stay: 'aid=42' }).find(l => l.key === 'stay').url.endsWith('&aid=42'), 'bookingLinks carry the affiliate id');
+  ok(stayLink({ area: 'Old Town', location: 'Riga, Latvia', starts_on: '2026-12-11', ends_on: '2026-12-13', guests: 4 }, { stay: 'aid=42' }).includes('ss=Old+Town%2C+Riga'), 'stayLink searches the suggested area');
   eq(fmtRange('2026-03-10', '2026-03-12'), '10–12 Mar', 'fmtRange same month');
 
   // ── Demo backend enforces the same rules as the database ──

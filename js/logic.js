@@ -203,7 +203,29 @@ export function tripBudget(location, nights, guests, ticket = 0) {
   return { travel, stay, food, fun, ticket: ticket || 0, total: travel + stay + food + fun + (ticket || 0), tier };
 }
 
-export function bookingLinks({ location, starts_on, ends_on, guests = 2, origin = '' }) {
+// Adds the partner's affiliate tracking to a booking link (see AFFILIATE in config.js).
+export function withAffiliate(url, tpl) {
+  tpl = String(tpl || '').trim();
+  if (!tpl) return url;
+  if (tpl.includes('{url}')) return tpl.replace('{url}', encodeURIComponent(url));
+  return url + (url.includes('?') ? '&' : '?') + tpl.replace(/^[?&]/, '');
+}
+
+// Which booking partner fits a way of travelling.
+export const MODE_PARTNER = { flight: 'flights', train: 'trains', bus: 'trains', ferry: 'trains', car: 'car' };
+
+// Deep links for one recommendation from the AI trip plan.
+export function stayLink({ area, location, starts_on, ends_on, guests = 2 }, aff = {}) {
+  const co = ends_on > starts_on ? ends_on : iso(addDays(parseDay(starts_on), 1));
+  const city = String(location || '').split(',')[0].trim();
+  return withAffiliate('https://www.booking.com/searchresults.html?' + new URLSearchParams({ ss: [area, city].filter(Boolean).join(', '), checkin: starts_on, checkout: co, group_adults: guests, no_rooms: Math.ceil(guests / 2) }), aff.stay);
+}
+export function todoLink({ name, location }, aff = {}) {
+  const city = String(location || '').split(',')[0].trim();
+  return withAffiliate('https://www.getyourguide.com/s/?q=' + encodeURIComponent([name, city].filter(Boolean).join(' ')), aff.todo);
+}
+
+export function bookingLinks({ location, starts_on, ends_on, guests = 2, origin = '' }, aff = {}) {
   const city = String(location || '').split(',')[0].trim();
   const ci = starts_on, co = ends_on > starts_on ? ends_on : iso(addDays(parseDay(starts_on), 1));
   const flat = s => s.replace(/-/g, '').slice(2);
@@ -221,5 +243,6 @@ export function bookingLinks({ location, starts_on, ends_on, guests = 2, origin 
     { key: 'trains', label: 'Trains & buses', sub: 'Omio', icon: 'compass',
       url: 'https://www.omio.com/search?' + new URLSearchParams({ arrival: city, departure_date: ci, ...(origin ? { departure: origin } : {}) }) },
   ];
+  for (const l of links) l.url = withAffiliate(l.url, aff[l.key === 'airbnb' ? '' : l.key]);
   return links;
 }

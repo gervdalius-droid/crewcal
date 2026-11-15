@@ -9,3 +9,16 @@ export const AI_FREE_MONTHLY = 25;
 // Pricing shown on the upgrade sheet. Billing is not wired yet.
 export const PRO_PRICE = { month: '€4.99', year: '€39' };
 export const SUPPORT_EMAIL = 'hello@whossup.app';
+
+// ── Booking partners (how the trip planner earns) ────────────
+// Paste what each affiliate programme gives you. Two forms work:
+//   'aid=1234567'                               → added to the partner link as a query parameter
+//   'https://tp.media/r?marker=..&p=..&u={url}' → a deep-link wrapper; {url} is replaced with the encoded partner link
+// Empty = plain link, no commission. Keys match the cards in the trip planner.
+export const AFFILIATE = {
+  stay: '',      // Booking.com      (hotels, apartments, hostels)
+  flights: '',   // Skyscanner
+  trains: '',    // Omio             (trains & buses)
+  car: '',       // Rentalcars
+  todo: '',      // GetYourGuide     (tours, tickets, activities)
+};
