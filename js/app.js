@@ -7,7 +7,7 @@ import { calendarView } from './views/calendar.js';
 import { plansView } from './views/plans.js';
 import { chatView } from './views/chat.js';
 import { moneyView } from './views/money.js';
-import { crewView, openProfile, openCrewSwitcher, applyTheme } from './views/crew.js';
+import { crewView, openProfile, openCrewSwitcher, openInviteSheet, applyTheme } from './views/crew.js';
 import { openSheet, topSheet, field } from './ui.js';
 
 const TABS = [
@@ -18,7 +18,7 @@ const TABS = [
   ['crew', 'Crew', 'users'],
 ];
 const scrollMem = {};
-let lastTab = null, recoveryShown = false;
+let lastTab = null, inviteShown = null, recoveryShown = false;
 
 function render() {
   const root = document.getElementById('app');
@@ -36,6 +36,11 @@ function render() {
   lastTab = S.screen === 'app' ? S.tab : null;
   if (keepId) { const el = document.getElementById(keepId); if (el) { el.focus({ preventScroll: true }); if (sel) try { el.setSelectionRange(...sel); } catch {} } }
 
+  // Invite link: show the join sheet once the user is signed in with a profile.
+  if (S.pendingInvite && S.profile && S.user && inviteShown !== S.pendingInvite && !topSheet()) {
+    inviteShown = S.pendingInvite; openInviteSheet(S.pendingInvite);
+    if (S.screen === 'boot' || S.screen === 'profile') route();
+  }
   if (S.recovery && !recoveryShown) { recoveryShown = true; openNewPassword(); }
   pendingPoll();
 }

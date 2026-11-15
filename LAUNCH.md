@@ -19,11 +19,7 @@ v2 replaces it with proper tables under row-level security. Same Supabase projec
     supabase functions deploy ai
 Optional: `AI_FREE_MONTHLY` (default 25; keep in sync with `js/config.js`), `GEMINI_MODEL`.
 
-## 3. Auth settings
-- Sign In / Providers → **Allow anonymous sign-ins: ON** (guest accounts: invite links and "Get started" need no email).
-- Run `supabase/migrations/003_open_join.sql` (new crews join without approval).
-
-URL configuration:
+## 3. Auth settings (Authentication → URL configuration)
 - Site URL = your app URL; add the same URL to Redirect URLs (magic links, confirmations, password reset).
 - Email templates: put the Whossup name in the subject lines.
 - Turn on "Confirm email" and leaked-password protection. Set a custom SMTP sender before real users

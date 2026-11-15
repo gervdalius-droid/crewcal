@@ -150,8 +150,7 @@ export function openProfile() {
       if (await attempt(() => importBusy(days).then(() => true))) { toast(days.length + ' busy days imported', 'ok'); sheet.redraw(); }
     } });
     body.append(
-      h('div.me-head', avatar({ name: f.name, color: f.color }, 64), h('div', h('div.me-name', S.profile.name), h('div.muted.small', S.user.guest ? 'Guest account on this device' : (S.user.email || '')))),
-      S.user.guest && !S.api.demo ? saveAccountCard() : null,
+      h('div.me-head', avatar({ name: f.name, color: f.color }, 64), h('div', h('div.me-name', S.profile.name), h('div.muted.small', S.user.email || ''))),
       field('Display name', input([f, 'name'], { maxlength: 40 })),
       h('div.field', h('span.flabel', 'Your colour'), h('div.color-pick', PALETTE.map(c => h('button' + (f.color === c ? '.on' : ''), { style: { '--c': c }, 'aria-label': c, onclick: () => { f.color = c; sheet.redraw(); } })))),
       h('button.btn.primary.block', { onclick: async () => {
@@ -176,38 +175,8 @@ export function openProfile() {
       h('div.section', h('div.menu',
         S.api.demo ? h('button.menu-i', { onclick: () => { S.api.reset(); location.reload(); } }, icon('refresh'), h('span.grow', 'Reset demo data')) : null,
         h('a.menu-i', { href: 'mailto:' + SUPPORT_EMAIL + '?subject=Whossup%20feedback' }, icon('mail'), h('span.grow', 'Send feedback')),
-        h('button.menu-i.danger-text', { onclick: signOutFlow }, icon('logout'), h('span.grow', S.api.demo ? 'Leave demo' : 'Sign out')))));
+        h('button.menu-i.danger-text', { onclick: async () => { if (await confirmSheet({ title: 'Sign out?', ok: 'Sign out' })) { await S.api.signOut(); if (S.api.demo) location.href = location.pathname; } } }, icon('logout'), h('span.grow', S.api.demo ? 'Leave demo' : 'Sign out')))));
   });
-}
-
-// Guests have no email: offer to add one so the account survives a new phone.
-function saveAccountCard() {
-  const st = { email: '', sent: '' };
-  const box = h('div.save-acc');
-  const draw = () => box.replaceChildren(
-    h('div.save-acc-h', icon('shield', 18), h('b', 'Save your account')),
-    st.sent ? h('p.small', 'Check ', h('b', st.sent), ' and tap the link. After that you can sign in on any device with an email link.')
-      : h('div',
-        h('p.small.muted', 'You’re using Whossup without an email. Add one so you can log in on another phone — otherwise this account lives only on this device.'),
-        h('div.row.gap-s.mt-s',
-          h('input.grow', { type: 'email', placeholder: 'you@email.com', autocomplete: 'email', oninput: e => (st.email = e.target.value) }),
-          h('button.btn.soft', { onclick: async () => {
-            const em = st.email.trim();
-            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return toast('Enter a valid email', 'err');
-            if (await attempt(() => S.api.saveEmail(em).then(() => true))) { st.sent = em; draw(); }
-          } }, 'Save'))));
-  draw();
-  return box;
-}
-
-export async function signOutFlow() {
-  const guest = S.user?.guest && !S.api.demo;
-  const ok = await confirmSheet(guest
-    ? { title: 'Sign out of a guest account?', text: 'You haven’t added an email, so you won’t be able to get back into this account or your crews. Add an email in your profile first to keep it.', ok: 'Sign out anyway', danger: true }
-    : { title: 'Sign out?', ok: 'Sign out' });
-  if (!ok) return;
-  await S.api.signOut();
-  if (S.api.demo) location.href = location.pathname;
 }
 
 export function applyTheme() {
