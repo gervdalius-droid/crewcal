@@ -1,0 +1,5 @@
+confirm-signup: Confirm your email for Whossup
+magic-link: Your Whossup sign-in link
+reset-password: Reset your Whossup password
+change-email: Confirm your new email for Whossup
+invite: You’re invited to Whossup
