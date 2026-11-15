@@ -131,5 +131,15 @@ catch (e) { console.error(e); api = new DemoApi(); }
 if (!isDemo && !window.supabase) toast('Could not reach the server — showing the demo', 'err');
 boot(api).catch(e => { console.error(e); S.screen = 'welcome'; render(); toast('Could not connect — check your internet', 'err'); });
 
-if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  // When a new version takes over, reload once so people see the update straight away
+  // (otherwise the old cached files show until the next visit). Not on the very first install.
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloaded) return;
+    reloaded = true; location.reload();
+  });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});
+}
 window.__whossup = { S, loadCrew, go, render };
