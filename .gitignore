@@ -3,3 +3,4 @@ supabase/.temp/
 supabase/.branches/
 *.local
 shots/
+__pycache__/
