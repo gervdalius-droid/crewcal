@@ -6,28 +6,32 @@ import { segmented } from '../ui.js';
 const auth = { mode: 'signin', email: '', password: '', busy: false, sent: '', err: '' };
 
 export function welcomeScreen() {
-  // A tiny animated availability grid sells the idea faster than words.
+  // The same availability grid as the share image: gradient days = everyone's free.
   const grid = h('div.hero-grid', { 'aria-hidden': 'true' });
-  const pattern = [0, 1, 0, 2, 3, 3, 1, 0, 2, 1, 0, 3, 3, 0, 1, 0, 0, 2, 3, 3, 2, 2, 1, 0, 1, 0, 3, 3];
-  pattern.forEach((v, i) => grid.append(h('span.hg' + (v === 3 ? '.all' : v === 2 ? '.most' : v === 1 ? '.some' : ''), { style: { animationDelay: (i * 45) + 'ms' } })));
+  ['_m_maa_', 'm___aam', '_mm_maa', '__maaa_', 'm__m_aa'].join('').split('').forEach((v, i) =>
+    grid.append(h('span.hg' + (v === 'a' ? '.all' : v === 'm' ? '.most' : ''), { style: { animationDelay: (i * 28) + 'ms' } })));
+  const go = mode => () => { auth.mode = mode; S.screen = 'auth'; render(); };
   return h('div.onb.welcome',
     h('div.onb-glow'),
     h('div.welcome-in',
-      h('img.welcome-logo', { src: 'img/logo.png', alt: 'whossup', width: 320, height: 320 }),
-      h('h1.welcome-h', 'Find the day ', h('span.iris-text', 'everyone’s free'), '.'),
+      h('section.welcome-hero',
+        h('div.welcome-copy',
+          h('div.brand-row', h('img.brand-mark', { src: 'img/mark.png', alt: '', width: 64, height: 64 }), h('span.brand-name', 'whos', h('span.wm-sup', 'sup'))),
+          h('h1.welcome-h', 'Find the day', h('br'), h('span.disco-text', 'everyone’s free.')),
+          h('p.welcome-p', 'Shared availability, plans, AI trip ideas and bill splitting for your crew.'),
+          h('div.welcome-cta',
+            h('button.btn.disco.lg', { onclick: go('signup') }, 'Get started — it’s free'),
+            h('button.btn.ghost.lg', { onclick: go('signin') }, 'I already have an account')),
+          h('a.demo-link', { href: '?demo=1' }, icon('sparkles', 15), 'Try the demo crew — no sign-up'),
+          S.pendingInvite ? h('div.invite-note', icon('link', 16), 'You’ve been invited to a crew — sign in to join.') : null),
+        grid),
       h('ol.welcome-steps',
         [['calendar', 'Mark your busy days', 'One tap per day — or import your calendar'],
          ['sparkles', 'See when everyone’s free', 'The best dates light up for the whole crew'],
          ['check', 'Make it happen', 'Plan it, RSVP, split the bill, chat']].map(([ic, t, d], i) =>
           h('li.wstep', { style: { animationDelay: (120 + i * 110) + 'ms' } },
             h('span.wstep-n', i + 1), h('span.wstep-ic', icon(ic, 18)),
-            h('span.wstep-txt', h('b', t), h('span', d))))),
-      grid,
-      h('div.welcome-cta',
-        h('button.btn.iris.lg.block', { onclick: () => { auth.mode = 'signup'; S.screen = 'auth'; render(); } }, 'Get started — it’s free'),
-        h('button.btn.ghost.lg.block', { onclick: () => { auth.mode = 'signin'; S.screen = 'auth'; render(); } }, 'I already have an account'),
-        h('a.demo-link', { href: '?demo=1' }, icon('sparkles', 15, 'iris'), 'Try the demo crew — no sign-up')),
-      S.pendingInvite ? h('div.invite-note', icon('link', 16), 'You’ve been invited to a crew — sign in to join.') : null));
+            h('span.wstep-txt', h('b', t), h('span', d)))))));
 }
 
 export function authScreen() {
