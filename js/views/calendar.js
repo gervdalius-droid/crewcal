@@ -21,7 +21,7 @@ export function calendarView() {
     segmented([['view', 'Browse'], ['mark', 'Mark my busy days']], S.cal.mark ? 'mark' : 'view', v => { S.cal.mark = v === 'mark'; render(); }, 'grow'),
   );
   const hint = S.cal.mark
-    ? h('div.hint.mark-hint', icon('edit', 16), 'Tap every day you can’t make it. Saved instantly — your crew sees it live.')
+    ? h('div.hint.mark-hint', icon('edit', 16), 'Tap the days you can’t make it — or slide your finger across several. Saved instantly.')
     : null;
 
   const grid = monthGrid(y, m, people);
@@ -34,7 +34,7 @@ export function calendarView() {
   const main = h('div.cal-main', head, modeBar, hint, h('div.card.cal-card', grid, legend));
   const side = h('div.cal-side', bestDaysCard(people), freeTodayCard(people), windowsCard(people));
   wrap.append(main, side);
-  attachSwipe(grid);
+  if (!S.cal.mark) attachSwipe(grid);   // in mark mode a sideways slide marks days instead
   return wrap;
 }
 
@@ -75,10 +75,10 @@ function monthGrid(y, m, people) {
     const cell = h('button.' + cls, {
       role: 'gridcell', 'data-day': day,
       'aria-label': fmtDay(day, { relative: false }) + ' — ' + st.free.length + ' of ' + people.length + ' free' + (mine ? ', you are busy' : '') + (evs.length ? ', ' + evs.length + ' plan' : ''),
-      onclick: () => {
+      onclick: e => {
         if (S.cal.mark) {
-          if (past) toast('That day has already passed — tap today or later');
-          else { S.cal.flash = day; setTimeout(() => { if (S.cal.flash === day) S.cal.flash = null; }, 400); toggleBusy(day); }
+          // Taps and swipes are handled by the painter below; this only covers keyboard (Enter/Space).
+          if (e.detail === 0) { if (past) toast('That day has already passed — tap today or later'); else toggleBusy(day); }
         }
         else openDaySheet(day);
       },
@@ -91,7 +91,42 @@ function monthGrid(y, m, people) {
     );
     grid.append(cell);
   }
+  if (S.cal.mark) attachPainter(grid);
   return grid;
+}
+
+// Mark mode: tap a day, or press and slide across several days to mark them all in one go.
+function attachPainter(grid) {
+  let paint = null;
+  const apply = c => {
+    const d = c?.dataset.day;
+    if (!d || !paint || c.classList.contains('past') || c.classList.contains('out') || paint.days.has(d)) return;
+    paint.days.add(d);
+    c.classList.toggle('mine', paint.on);
+    c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash');
+    if (navigator.vibrate) try { navigator.vibrate(8); } catch {}
+  };
+  grid.addEventListener('pointerdown', e => {
+    const c = e.target.closest('.cell'); if (!c || !grid.contains(c)) return;
+    if (c.classList.contains('past')) { toast('That day has already passed — tap today or later'); return; }
+    if (c.classList.contains('out')) return;
+    e.preventDefault();
+    paint = { on: !c.classList.contains('mine'), days: new Set() };
+    apply(c);
+    try { grid.setPointerCapture(e.pointerId); } catch {}
+  });
+  grid.addEventListener('pointermove', e => {
+    if (!paint) return;
+    apply(document.elementFromPoint(e.clientX, e.clientY)?.closest('.cell'));
+  });
+  const end = () => {
+    if (!paint) return;
+    const p = paint; paint = null;
+    for (const d of p.days) if (iAmBusy(d) !== p.on) toggleBusy(d, p.on);
+    if (p.days.size > 1) toast(p.days.size + ' days marked ' + (p.on ? 'busy' : 'free'), 'ok');
+  };
+  grid.addEventListener('pointerup', end);
+  grid.addEventListener('pointercancel', end);
 }
 
 function bestDaysCard(people) {
