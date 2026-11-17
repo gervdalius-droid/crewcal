@@ -20,5 +20,5 @@ export const AFFILIATE = {
   flights: '',   // Skyscanner
   trains: '',    // Omio             (trains & buses)
   car: '',       // Rentalcars
-  todo: '',      // GetYourGuide     (tours, tickets, activities)
+  todo: 'partner_id=RZW4U9F&utm_medium=online_publisher', // GetYourGuide     (tours, tickets, activities)
 };
